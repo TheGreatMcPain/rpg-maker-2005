@@ -1,1 +1,1 @@
-# A Text Based RGB powered by AI
+# A Text Based RPG powered by AI

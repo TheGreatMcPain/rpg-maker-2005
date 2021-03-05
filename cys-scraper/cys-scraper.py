@@ -14,7 +14,7 @@ def main():
     def printUsage():
         print("Usage:", sys.argv[0], "-s,--story-id <story id>",
               "-d,--depth <depth>", "-o,--output <output file>",
-              "-h,--healess")
+              "-h,--headless")
 
     # Ignore the script name
     argv = sys.argv[1:]
@@ -26,7 +26,7 @@ def main():
 
     try:
         opts, args = getopt.getopt(
-            argv, "s:d:o:h", ["story-id =", "depth =", "output =", "headless"])
+            argv, "s:d:o:h", ["story-id=", "depth=", "output=", "headless"])
     except:
         print("Error\n")
         printUsage()
@@ -50,12 +50,15 @@ def main():
             headless = True
 
     if not storyID:
+        print("storyID is missing")
         printUsage()
         exit(1)
     if not depth:
+        print("Depth is missing")
         printUsage()
         exit(1)
     if not outputFile:
+        print("Output is missing")
         printUsage()
         exit(1)
 

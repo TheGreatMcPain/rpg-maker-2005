@@ -65,7 +65,7 @@ def main():
 
     browser.close()
 
-    print("Number of actions:", getNumActions(storyData))
+    # print("Number of actions:", getNumActions(storyData))
 
     # Dump results to a json file.
     with open(outputFile, 'w') as f:
@@ -101,6 +101,15 @@ def getCYSStory(browser: webdriver, storyID: int, depth: int):
     storyData = {}
 
     # TODO: Check if on a "Game Over" page.
+    try:
+        header = browser.find_element_by_xpath('/html/body/form/div[3]/h1')
+    except:
+        header = None
+
+    if header:
+        if "Rate" in header.text:
+            return storyData
+
     if depth == 0:
         return storyData
 
@@ -123,7 +132,10 @@ def getCYSStory(browser: webdriver, storyID: int, depth: int):
         action['action_text'] = link_text
 
         # Search for the link based on its text and click on it.
-        browser.find_element_by_link_text(link_text).click()
+        try:
+            browser.find_element_by_link_text(link_text).click()
+        except:
+            continue
 
         # Get the contents of that action.
         action['action_contents'] = getCYSStory(browser, storyID, depth - 1)

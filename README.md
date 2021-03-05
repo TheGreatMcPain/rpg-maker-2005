@@ -1,5 +1,11 @@
 # A Text Based RPG powered by AI
 
+## To clone the repository
+
+```
+$ git clone --recursive-submodules <repo url>
+```
+
 ## Useful git commands (run these while inside the repository)
 
 ### Set your username and email.

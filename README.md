@@ -3,7 +3,7 @@
 ## To clone the repository
 
 ```
-$ git clone --recursive-submodules <repo url>
+$ git clone --recursive <repo url>
 ```
 
 ## Useful git commands (run these while inside the repository)

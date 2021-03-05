@@ -12,7 +12,7 @@ GECKODRIVER = "/usr/bin/geckodriver"
 
 def main():
     def printUsage():
-        print("Usage:", sys.argv[0], "-s,--storyid <story id>",
+        print("Usage:", sys.argv[0], "-s,--story-id <story id>",
               "-d,--depth <depth>", "-o,--output <output file>",
               "-h,--healess")
 
@@ -81,7 +81,8 @@ def spawnBrowser(firefoxBinary: str, geckodriver: str, headless: bool):
     options.headless = headless
     options.executable_path = geckodriver
 
-    return webdriver.Firefox(options=options,
+    return webdriver.Firefox(executable_path=geckodriver,
+                             options=options,
                              firefox_binary=firefoxBinary,
                              service_log_path=os.path.devnull)
 

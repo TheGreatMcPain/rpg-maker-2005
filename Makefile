@@ -2,7 +2,7 @@ SHELL=/bin/sh
 
 VENV_NAME=virtualenv
 
-TARGET=tensorflow-test.py
+TARGET=placeholder.py
 
 # Setup python virtualenv and install requirements
 setup:
@@ -11,11 +11,11 @@ setup:
 	pip install -r requirements.txt; \
 	deactivate
 
-# Run TARGET
-run: setup
-	. ./$(VENV_NAME)/bin/activate; \
-	python3 $(TARGET); \
-	deactivate
+# # Run TARGET
+# run: setup
+# 	. ./$(VENV_NAME)/bin/activate; \
+# 	python3 $(TARGET); \
+# 	deactivate
 
 # Delete files
 clean:

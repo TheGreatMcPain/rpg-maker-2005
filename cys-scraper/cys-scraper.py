@@ -93,7 +93,7 @@ def spawnBrowser(firefoxBinary: str, geckodriver: str, headless: bool):
 # Returns a dictionary containing the contents of a ChooseYourStory story.
 # browser: A webdriver object
 # storyID: The last digits from a CYS story url
-# depth:   How many choices deep to go.
+# depth:   How many choices deep to go. (negative numbers with disable this)
 def getCYSStory(browser: webdriver, storyID: int, depth: int):
     storyLink = "https://chooseyourstory.com/story/viewer/default.aspx?StoryId="
     storyLink += str(storyID)

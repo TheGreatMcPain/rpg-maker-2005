@@ -68,7 +68,7 @@ def main():
 
     browser.close()
 
-    # print("Number of actions:", getNumActions(storyData))
+    print("Number of actions:", getNumActions(storyData))
 
     # Dump results to a json file.
     with open(outputFile, 'w') as f:
@@ -152,14 +152,18 @@ def getCYSStory(browser: webdriver, storyID: int, depth: int):
     return storyData
 
 
-def getNumActions(storyData: dict, actionCount: int = 0):
+# Returns the number of actions in the story game.
+# storyData: A dictionary that contains the story data.
+def getNumActions(storyData: dict):
+    actionCount = 0
+
     if storyData == {}:
         return actionCount
 
     actionCount += len(storyData['actions'])
 
     for action in storyData['actions']:
-        actionCount += getNumActions(action, actionCount)
+        actionCount += getNumActions(action['action_contents'])
 
     return actionCount
 

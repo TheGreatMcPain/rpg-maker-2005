@@ -5,16 +5,30 @@ import getopt
 import os
 from selenium import webdriver
 
-# PLEASE CHANGE FOR YOUR SYSTEM
-FIREFOX_BINARY = "/usr/lib64/librewolf/librewolf"
-GECKODRIVER = "/usr/bin/geckodriver"
 
-
+# Copy the file 'config.json.sample' to 'config.json'
+# and edit accordingly
 def main():
     def printUsage():
         print("Usage:", sys.argv[0], "-s,--story-id <story id>",
               "-d,--depth <depth>", "-o,--output <output file>",
               "-h,--headless")
+
+    # Get the absolute path of 'config.json'
+    configPath = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                              "config.json")
+
+    # If 'config.json' exists attempt to load it
+    # and configure the 'firefoxBinary' and 'geckodriver' variables
+    if os.path.isfile(configPath):
+        with open(configPath, 'r') as config:
+            configJSON = json.load(config)
+
+        firefoxBinary = configJSON['FIREFOX_BINARY']
+        geckodriver = configJSON['GECKODRIVER']
+    else:
+        print("'config.json' was not found!")
+        exit(1)
 
     # Ignore the script name
     argv = sys.argv[1:]
@@ -62,7 +76,7 @@ def main():
         printUsage()
         exit(1)
 
-    browser = spawnBrowser(FIREFOX_BINARY, GECKODRIVER, headless)
+    browser = spawnBrowser(firefoxBinary, geckodriver, headless)
 
     storyData = getCYSStory(browser, storyID, depth)
 

@@ -1,0 +1,4 @@
+{
+  "FIREFOX_BINARY": "/path/to/firefox",
+  "GECKODRIVER": "/path/to/geckodriver"
+}

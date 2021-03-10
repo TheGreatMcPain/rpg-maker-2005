@@ -1,3 +1,4 @@
 virtualenv
 __pycache__
 cys-scraper/config.json
+cys-scraper/*.json

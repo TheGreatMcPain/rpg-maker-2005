@@ -3,7 +3,12 @@ import json
 import sys
 import getopt
 import os
+import reprint
+import time
 from selenium import webdriver
+
+# Global script start time.
+START_TIME = time.time()
 
 
 # Copy the file 'config.json.sample' to 'config.json'
@@ -94,12 +99,30 @@ def main():
 
     browser = spawnBrowser(firefoxBinary, geckodriver, headless)
 
-    storyData = getCYSStory(browser, storyID, depth)
+    # Use reprint.output to print status to the terminal.
+    #
+    # (Basically anytime the list 'status_list' changes within
+    #  the 'with' block the terminal output will change too.)
+    with reprint.output(output_type="list", initial_len=4,
+                        interval=0) as status_list:
+        # Initial message
+        status_list[0] = "Scraping StoryID: " + str(storyID)
+        status_list[1] = "Elapsed Time (secs): " + str(
+            int(time.time() - START_TIME))
+        status_list[2] = "Current Action: (Nothing to show yet)"
+        status_list[3] = "Number of other actions: (Nothing to show yet)"
+
+        storyData = getCYSStory(browser, storyID, depth, status_list)
+
+        # Clear output (Prevents any terminal output weirdness)
+        status_list.clear()
 
     browser.close()
 
     actionCount, branches = getStoryStats(storyData)
 
+    print("Finished!\n")
+    print("Total Runtime (secs):", int(time.time() - START_TIME), end="\n\n")
     print("Story title:", storyData['story_title'])
     print("Story ID:", storyData['story_id'])
     print("Total number of actions:", actionCount)
@@ -126,10 +149,22 @@ def spawnBrowser(firefoxBinary: str, geckodriver: str, headless: bool):
 
 
 # Returns a dictionary containing the contents of a ChooseYourStory story.
-# browser: A webdriver object
-# storyID: The last digits from a CYS story url
-# depth:   How many choices deep to go. (negative numbers with disable this)
-def getCYSStory(browser: webdriver, storyID: int, depth: int):
+# browser:     A webdriver object
+# storyID:     The last digits from a CYS story url
+# depth:       How many choices deep to go. (negative numbers with disable this)
+# status_list: The list from 'reprint.output()'
+def getCYSStory(browser: webdriver, storyID: int, depth: int,
+                status_list: list):
+    # Updates the second, third, and fourth lines of the terminal output.
+    def updateStatus(currentAction: dict, status_list: list):
+        # Don't even try to access an empty dictionary.
+        if currentAction['action_contents'] != {}:
+            status_list[1] = "Elapsed Time (secs): " + str(
+                int(time.time() - START_TIME))
+            status_list[2] = "Current Action: " + currentAction['action_text']
+            status_list[3] = "Number of other actions: " + str(
+                len(currentAction['action_contents']['actions']))
+
     storyLink = "https://chooseyourstory.com/story/viewer/default.aspx?StoryId="
     storyLink += str(storyID)
 
@@ -183,16 +218,16 @@ def getCYSStory(browser: webdriver, storyID: int, depth: int):
             continue
 
         # Get the contents of that action.
-        action['action_contents'] = getCYSStory(browser, storyID, depth - 1)
+        action['action_contents'] = getCYSStory(browser, storyID, depth - 1,
+                                                status_list)
 
         browser.back()
 
         # Add the results to our list of actions.
         storyData['actions'].append(action)
 
-        # TODO: Current status (We can use getStoryStats for this)
-        # This will allow us to know if things are 'working'
-        # if headless is enabled.
+        # Update terminal output.
+        updateStatus(action, status_list)
 
     return storyData
 

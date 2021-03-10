@@ -82,7 +82,7 @@ def main():
 
     browser.close()
 
-    actionCount, branches = getNumActions(storyData)
+    actionCount, branches = getStoryStats(storyData)
 
     print("Total number of actions:", actionCount)
     print("Total branches that occur:", branches)
@@ -171,7 +171,7 @@ def getCYSStory(browser: webdriver, storyID: int, depth: int):
 
 # Returns the number of actions, and branches in the story.
 # storyData: A dictionary that contains the story data.
-def getNumActions(storyData: dict):
+def getStoryStats(storyData: dict):
     actionCount = 0
     branches = 0
 
@@ -184,7 +184,7 @@ def getNumActions(storyData: dict):
         branches += 1
 
     for action in storyData['actions']:
-        returnValue = getNumActions(action['action_contents'])
+        returnValue = getStoryStats(action['action_contents'])
         actionCount += returnValue[0]
         branches += returnValue[1]
 

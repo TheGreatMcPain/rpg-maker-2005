@@ -144,12 +144,13 @@ def getCYSStory(browser: webdriver, storyID: int, depth: int):
         storyData['story_title'] = browser.title.split(" :: ")[0]
         storyData['story_id'] = str(storyID)
 
-    # TODO: Check if on a "Game Over" page.
+    # Check if on a "Rate this story" page.
     try:
         header = browser.find_element_by_xpath('/html/body/form/div[3]/h1')
     except:
         header = None
 
+    # Stop if we are on a "Rate this story" page.
     if header:
         if "Rate" in header.text:
             return storyData
@@ -188,6 +189,10 @@ def getCYSStory(browser: webdriver, storyID: int, depth: int):
 
         # Add the results to our list of actions.
         storyData['actions'].append(action)
+
+        # TODO: Current status (We can use getStoryStats for this)
+        # This will allow us to know if things are 'working'
+        # if headless is enabled.
 
     return storyData
 

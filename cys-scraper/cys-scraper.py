@@ -12,7 +12,21 @@ def main():
     def printUsage():
         print("Usage:", sys.argv[0], "-s,--story-id <story id>",
               "-d,--depth <depth>", "-o,--output <output file>",
-              "-h,--headless")
+              "-h,--headless\n")
+
+    def printHelp():
+        printUsage()
+        print(
+            "  -s,--story-id <story id>:   'required' The last digits from a",
+            "ChooseYourStory story url.\n")
+        print("  -d,--depth <depth>:         'required'",
+              "How many choices deep we should scrape.")
+        print("                                        ",
+              "(Use a negative number to disable.)\n")
+        print("  -o,--output <output file>:  'required'",
+              "The json file which we'll output to.\n")
+        print("  -h,--headless:                        ",
+              "Don't show the browser window while scraping\n")
 
     # Get the absolute path of 'config.json'
     configPath = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -32,6 +46,11 @@ def main():
 
     # Ignore the script name
     argv = sys.argv[1:]
+
+    # Print the full help message if no arguments are present.
+    if len(argv) == 0:
+        printHelp()
+        exit(1)
 
     storyID = None
     depth = None

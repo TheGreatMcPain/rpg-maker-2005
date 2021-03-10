@@ -100,6 +100,8 @@ def main():
 
     actionCount, branches = getStoryStats(storyData)
 
+    print("Story title:", storyData['story_title'])
+    print("Story ID:", storyData['story_id'])
     print("Total number of actions:", actionCount)
     print("Total branches that occur:", branches)
 
@@ -131,11 +133,16 @@ def getCYSStory(browser: webdriver, storyID: int, depth: int):
     storyLink = "https://chooseyourstory.com/story/viewer/default.aspx?StoryId="
     storyLink += str(storyID)
 
+    storyData = {}
+
     # Don't open the link if we are already on it.
     if browser.current_url != storyLink:
         browser.get(storyLink)
 
-    storyData = {}
+        # Since this is the first instance of the function lets
+        # also store the story's title and id for later use.
+        storyData['story_title'] = browser.title.split(" :: ")[0]
+        storyData['story_id'] = str(storyID)
 
     # TODO: Check if on a "Game Over" page.
     try:

@@ -64,15 +64,12 @@ def main():
             headless = True
 
     if not storyID:
-        print("storyID is missing")
         printUsage()
         exit(1)
     if not depth:
-        print("Depth is missing")
         printUsage()
         exit(1)
     if not outputFile:
-        print("Output is missing")
         printUsage()
         exit(1)
 

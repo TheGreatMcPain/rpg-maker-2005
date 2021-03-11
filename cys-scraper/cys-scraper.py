@@ -119,7 +119,7 @@ def main():
 
     browser.close()
 
-    actionCount, branches = getStoryStats(storyData)
+    actionCount, branches, endings = getStoryStats(storyData)
 
     print("Finished!\n")
     print("Total Runtime (secs):", int(time.time() - START_TIME), end="\n\n")
@@ -127,6 +127,7 @@ def main():
     print("Story ID:", storyData['story_id'])
     print("Total number of actions:", actionCount)
     print("Total branches that occur:", branches)
+    print("Total number of possible endings:", endings)
 
     # Dump results to a json file.
     with open(outputFile, 'w') as f:
@@ -157,13 +158,16 @@ def getCYSStory(browser: webdriver, storyID: int, depth: int,
                 status_list: list):
     # Updates the second, third, and fourth lines of the terminal output.
     def updateStatus(currentAction: dict, status_list: list):
+
         # Don't even try to access an empty dictionary.
-        if currentAction['action_contents'] != {}:
+        if len(currentAction) != 1:
             status_list[1] = "Elapsed Time (secs): " + str(
                 int(time.time() - START_TIME))
+
             status_list[2] = "Current Action: " + currentAction['action_text']
+
             status_list[3] = "Number of other actions: " + str(
-                len(currentAction['action_contents']['actions']))
+                len(currentAction['actions']))
 
     storyLink = "https://chooseyourstory.com/story/viewer/default.aspx?StoryId="
     storyLink += str(storyID)
@@ -218,8 +222,7 @@ def getCYSStory(browser: webdriver, storyID: int, depth: int,
             continue
 
         # Get the contents of that action.
-        action['action_contents'] = getCYSStory(browser, storyID, depth - 1,
-                                                status_list)
+        action.update(getCYSStory(browser, storyID, depth - 1, status_list))
 
         browser.back()
 
@@ -237,9 +240,11 @@ def getCYSStory(browser: webdriver, storyID: int, depth: int,
 def getStoryStats(storyData: dict):
     actionCount = 0
     branches = 0
+    endings = 0
 
-    if storyData == {}:
-        return actionCount, branches
+    if len(storyData) == 1:
+        endings += 1
+        return actionCount, branches, endings
 
     actionCount += len(storyData['actions'])
 
@@ -247,11 +252,12 @@ def getStoryStats(storyData: dict):
         branches += 1
 
     for action in storyData['actions']:
-        returnValue = getStoryStats(action['action_contents'])
+        returnValue = getStoryStats(action)
         actionCount += returnValue[0]
         branches += returnValue[1]
+        endings += returnValue[2]
 
-    return actionCount, branches
+    return actionCount, branches, endings
 
 
 if __name__ == "__main__":

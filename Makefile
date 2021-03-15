@@ -7,6 +7,8 @@ setup:
 	python3 -m venv $(VENV_NAME); \
 	. ./$(VENV_NAME)/bin/activate; \
 	pip install -r requirements.txt; \
+	pip install -r gpt-2/requirements.txt; \
+	pip install tensorflow==2.4.1; \
 	deactivate
 
 # Delete files

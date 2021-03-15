@@ -51,7 +51,7 @@ def makeStoryString(storyData: dict):
 
         storyText = actionText + storyData['story_text'] + "\n" + storyText
 
-    return "<|startoftext|>\n" + storyText
+    return storyText
 
 
 if __name__ == "__main__":

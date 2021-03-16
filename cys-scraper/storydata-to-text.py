@@ -14,7 +14,10 @@ def main():
     storyTexts = storyDataToString(storyData)
 
     for x in storyTexts:
-        print(x)
+        outFile = open(argv[1], "w")
+        outFile.write(x)
+
+    outFile.close()
 
     print("Number of texts:", len(storyTexts))
 

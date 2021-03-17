@@ -23,7 +23,12 @@ def main():
         printUsage()
         print(
             "  -s,--story-id <story id>:   'required' The last digits from a",
-            "ChooseYourStory story url.\n")
+            "ChooseYourStory story url.")
+        print(
+            "                                        ",
+            "Scrape through multiple storyids by inputing a comma separated list.\n",
+            "                                       ",
+            "Example: 1234,1447,1002\n")
         print("  -d,--depth <depth>:         'required'",
               "How many choices deep we should scrape.")
         print("                                        ",
@@ -58,6 +63,7 @@ def main():
         exit(1)
 
     storyID = None
+    storyDataList = []
     depth = None
     outputFile = None
     headless = False
@@ -79,7 +85,7 @@ def main():
 
     for opt, arg in opts:
         if opt in ['-s', '--story-id']:
-            storyID = int(arg)
+            storyIDs = [int(x) for x in arg.split(",")]
         elif opt in ['-d', '--depth']:
             depth = int(arg)
         elif opt in ['-o', '--output']:
@@ -87,7 +93,7 @@ def main():
         elif opt in ['-h', '--headless']:
             headless = True
 
-    if not storyID:
+    if not storyIDs:
         printUsage()
         exit(1)
     if not depth:
@@ -103,35 +109,42 @@ def main():
     #
     # (Basically anytime the list 'status_list' changes within
     #  the 'with' block the terminal output will change too.)
-    with reprint.output(output_type="list", initial_len=4,
-                        interval=0) as status_list:
-        # Initial message
-        status_list[0] = "Scraping StoryID: " + str(storyID)
-        status_list[1] = "Elapsed Time (secs): " + str(
-            int(time.time() - START_TIME))
-        status_list[2] = "Current Action: (Nothing to show yet)"
-        status_list[3] = "Number of other actions: (Nothing to show yet)"
+    with reprint.output(output_type="list", interval=0) as status_list:
+        for storyID in storyIDs:
+            # Initial message
+            status_list.clear()
+            status_list.append("Scraping StoryID: " + str(storyID))
+            status_list.append("Elapsed Time (secs): " +
+                               str(int(time.time() - START_TIME)))
+            status_list.append("Current Action: (Nothing to show yet)")
+            status_list.append(
+                "Number of other actions: (Nothing to show yet)")
 
-        storyData = getCYSStory(browser, storyID, depth, status_list)
+            storyData = getCYSStory(browser, storyID, depth, {}, status_list)
+            storyDataList.append(storyData)
 
         # Clear output (Prevents any terminal output weirdness)
         status_list.clear()
 
     browser.close()
 
-    actionCount, branches, endings = getStoryStats(storyData)
-
     print("Finished!\n")
     print("Total Runtime (secs):", int(time.time() - START_TIME), end="\n\n")
-    print("Story title:", storyData['story_title'])
-    print("Story ID:", storyData['story_id'])
-    print("Total number of actions:", actionCount)
-    print("Total branches that occur:", branches)
-    print("Total number of possible endings:", endings)
+    for storyData in storyDataList:
+        actionCount, branches, endings = getStoryStats(storyData)
+        print("Story title:", storyData['story_title'])
+        print("Story ID:", storyData['story_id'])
+        print("Total number of actions:", actionCount)
+        print("Total branches that occur:", branches)
+        print("Total number of possible endings:", endings)
+        print()
 
     # Dump results to a json file.
     with open(outputFile, 'w') as f:
-        f.write(json.dumps(storyData, indent=2))
+        if len(storyDataList) > 1:
+            f.write(json.dumps(storyDataList, indent=2))
+        else:
+            f.write(json.dumps(storyDataList[0], indent=2))
 
 
 # returns a webdriver object
@@ -153,8 +166,9 @@ def spawnBrowser(firefoxBinary: str, geckodriver: str, headless: bool):
 # browser:     A webdriver object
 # storyID:     The last digits from a CYS story url
 # depth:       How many choices deep to go. (negative numbers with disable this)
+# frontier:    A dictionary for keeping track of already visited pages and actions.
 # status_list: The list from 'reprint.output()'
-def getCYSStory(browser: webdriver, storyID: int, depth: int,
+def getCYSStory(browser: webdriver, storyID: int, depth: int, frontier: dict,
                 status_list: list):
     # Updates the second, third, and fourth lines of the terminal output.
     def updateStatus(currentAction: dict, status_list: list):
@@ -202,12 +216,19 @@ def getCYSStory(browser: webdriver, storyID: int, depth: int,
 
     storyData['story_text'] = story_text
 
+    # Store the story_text in the 'frontier'
+    if story_text not in frontier.keys():
+        frontier[story_text] = []
+
     # Get All "choices" from current page
     links = browser.find_elements_by_xpath("/html/body/div[3]/ul/li")
 
     # Store the link's text in a list
     # (prevents 'ElementIsStale' errors)
     link_texts = [link.text for link in links]
+
+    # Filter the `list_texts` using the frontier.
+    link_texts = list(set(link_texts) - set(frontier[story_text]))
 
     # Make recursive calls for each link found
     storyData['actions'] = []
@@ -218,11 +239,14 @@ def getCYSStory(browser: webdriver, storyID: int, depth: int,
         # Search for the link based on its text and click on it.
         try:
             browser.find_element_by_link_text(link_text).click()
+            # If it worked we can add the 'action' to the frontier.
+            frontier[story_text].append(link_text)
         except:
             continue
 
         # Get the contents of that action.
-        action.update(getCYSStory(browser, storyID, depth - 1, status_list))
+        action.update(
+            getCYSStory(browser, storyID, depth - 1, frontier, status_list))
 
         browser.back()
 
@@ -231,6 +255,10 @@ def getCYSStory(browser: webdriver, storyID: int, depth: int,
 
         # Update terminal output.
         updateStatus(action, status_list)
+
+    # Remove this story_title from the frontier.
+    if story_text in frontier.keys():
+        frontier.pop(story_text)
 
     return storyData
 

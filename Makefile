@@ -19,5 +19,5 @@ clean:
 # Install jedi, yapf, and pylint for auto-completion, code formatting, and linting
 setup-development-stuff:
 	. ./$(VENV_NAME)/bin/activate; \
-	pip install jedi yapf pylint; \
+	pip install jedi yapf pylint neovim; \
 	deactivate

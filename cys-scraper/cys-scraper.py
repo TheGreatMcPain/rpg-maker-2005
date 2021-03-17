@@ -120,7 +120,7 @@ def main():
             status_list.append(
                 "Number of other actions: (Nothing to show yet)")
 
-            storyData = getCYSStory(browser, storyID, depth, status_list)
+            storyData = getCYSStory(browser, storyID, depth, {}, status_list)
             storyDataList.append(storyData)
 
         # Clear output (Prevents any terminal output weirdness)
@@ -166,8 +166,9 @@ def spawnBrowser(firefoxBinary: str, geckodriver: str, headless: bool):
 # browser:     A webdriver object
 # storyID:     The last digits from a CYS story url
 # depth:       How many choices deep to go. (negative numbers with disable this)
+# frontier:    A dictionary for keeping track of already visited pages and actions.
 # status_list: The list from 'reprint.output()'
-def getCYSStory(browser: webdriver, storyID: int, depth: int,
+def getCYSStory(browser: webdriver, storyID: int, depth: int, frontier: dict,
                 status_list: list):
     # Updates the second, third, and fourth lines of the terminal output.
     def updateStatus(currentAction: dict, status_list: list):
@@ -215,12 +216,19 @@ def getCYSStory(browser: webdriver, storyID: int, depth: int,
 
     storyData['story_text'] = story_text
 
+    # Store the story_text in the 'frontier'
+    if story_text not in frontier.keys():
+        frontier[story_text] = []
+
     # Get All "choices" from current page
     links = browser.find_elements_by_xpath("/html/body/div[3]/ul/li")
 
     # Store the link's text in a list
     # (prevents 'ElementIsStale' errors)
     link_texts = [link.text for link in links]
+
+    # Filter the `list_texts` using the frontier.
+    link_texts = list(set(link_texts) - set(frontier[story_text]))
 
     # Make recursive calls for each link found
     storyData['actions'] = []
@@ -231,11 +239,14 @@ def getCYSStory(browser: webdriver, storyID: int, depth: int,
         # Search for the link based on its text and click on it.
         try:
             browser.find_element_by_link_text(link_text).click()
+            # If it worked we can add the 'action' to the frontier.
+            frontier[story_text].append(link_text)
         except:
             continue
 
         # Get the contents of that action.
-        action.update(getCYSStory(browser, storyID, depth - 1, status_list))
+        action.update(
+            getCYSStory(browser, storyID, depth - 1, frontier, status_list))
 
         browser.back()
 
@@ -244,6 +255,10 @@ def getCYSStory(browser: webdriver, storyID: int, depth: int,
 
         # Update terminal output.
         updateStatus(action, status_list)
+
+    # Remove this story_title from the frontier.
+    if story_text in frontier.keys():
+        frontier.pop(story_text)
 
     return storyData
 

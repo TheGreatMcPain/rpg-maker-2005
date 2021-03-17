@@ -3,21 +3,58 @@
 # for training GPT-2.
 import json
 import sys
+import os
 
 
 def main():
+    def printUsage():
+        print("Usage:", os.path.basename(sys.argv[0]),
+              "<input.json> <output.txt>")
+
+    if len(sys.argv) == 1:
+        print("Convert story data from json to text for GPT-2 training.\n")
+        printUsage()
+        exit()
+
     argv = sys.argv[1:]
 
-    with open(argv[0], 'r') as f:
-        storyData = json.load(f)
+    if len(argv) < 2:
+        printUsage()
+        exit(1)
 
-    storyTexts = storyDataToString(storyData)
+    # Open json file and load it into storyData
+    try:
+        with open(argv[0], 'r') as f:
+            storyData = json.load(f)
+    except IOError as e:
+        print(e)
+        exit(e.errno)
+    except:
+        print("Oops,", argv[0], "failed to open.")
+        exit(1)
 
-    for x in storyTexts:
-        outFile = open(argv[1], "w")
-        outFile.write(x)
+    # Check if storyData is a list.
+    # If not make it a list of one item.
+    if not isinstance(storyData, list):
+        storyData = [storyData]
 
-    outFile.close()
+    # Loop through each story in storyData, and
+    # add them into one big list.
+    storyTexts = []
+    for story in storyData:
+        storyTexts += storyDataToString(story)
+
+    # Write the whole thing to file.
+    try:
+        with open(argv[1], "w") as outFile:
+            for x in storyTexts:
+                outFile.write(x)
+    except IOError as e:
+        print(e)
+        exit(e.errno)
+    except:
+        print("Oops,", argv[1], "failed to write.")
+        exit(1)
 
     print("Number of texts:", len(storyTexts))
 

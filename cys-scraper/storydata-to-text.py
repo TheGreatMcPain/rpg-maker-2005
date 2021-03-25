@@ -80,6 +80,38 @@ def storyDataToString(storyData: dict,
 
 
 def makeStoryString(storyData: dict):
+    # list of words that won't make since if we add "you"
+    # in front of. (Pulled from AIDungeon github)
+    dontAddYou = [
+        "the",
+        "another",
+        "next",
+        "in",
+        "monday",
+        "back",
+        "a",
+        "years",
+        "one",
+        "two",
+        "during",
+        "months",
+        "weeks",
+        "seven",
+        "three",
+        "...",
+        "twelve",
+        "four",
+        "five",
+        "six",
+        "blackness...",
+        "you",
+        "no",
+        "yes",
+        "up",
+        "down",
+        "onward",
+    ]
+
     storyText = "<|endoftext|>"
 
     while 'parent' in storyData.keys():
@@ -87,7 +119,25 @@ def makeStoryString(storyData: dict):
 
         actionText = ""
         if 'action_text' in storyData.keys():
-            actionText = "> " + storyData['action_text'] + "\n"
+            firstWord = storyData['action_text'].split(" ")[0]
+            if firstWord[-1] == ".":
+                firstWord = firstWord[:-1]
+
+            # Determine if firstWord is exists in dontAddYou
+            if firstWord.lower() in dontAddYou:
+                actionText = "> " + storyData['action_text'] + "\n"
+            else:
+                # Assume the action is dialogue if it's first
+                # character is a double quote.
+                if storyData['action_text'][0] == '"':
+                    # Only add the quote.
+                    lastQuote = storyData['action_text'].rfind('"')
+
+                    actionText = "> You say " + storyData[
+                        'action_text'][:lastQuote + 1] + "\n"
+                else:
+                    actionText = "> You " + storyData['action_text'][0].lower(
+                    ) + storyData['action_text'][1:] + "\n"
 
         storyText = actionText + storyData['story_text'] + "\n" + storyText
 

@@ -33,7 +33,7 @@ def main(argv):
                         type=int,
                         required=False,
                         default=20,
-                        help="Max number of storys per storyData.")
+                        help="Max number of versions of a story.")
 
     args = parser.parse_args(argv[1:])
 

@@ -213,12 +213,15 @@ def getCYSStory(browser: webdriver, storyID: int, depth: int, frontier: dict,
 
     # Get the "story" text from the current page
     story_text = browser.find_element_by_xpath("/html/body/div[3]/div[1]").text
+    page_title = browser.find_element_by_xpath("/html/body/div[2]/h1").text
 
     storyData['story_text'] = story_text
 
+    page_contents = page_title + "\n" + story_text
+
     # Store the story_text in the 'frontier'
-    if story_text not in frontier.keys():
-        frontier[story_text] = []
+    if page_contents not in frontier.keys():
+        frontier[page_contents] = []
 
     # Get All "choices" from current page
     links = browser.find_elements_by_xpath("/html/body/div[3]/ul/li")
@@ -228,7 +231,8 @@ def getCYSStory(browser: webdriver, storyID: int, depth: int, frontier: dict,
     link_texts = [link.text for link in links]
 
     # Filter the `list_texts` using the frontier.
-    link_texts = list(set(link_texts) - set(frontier[story_text]))
+    link_texts = list(set(link_texts) - set(frontier[page_contents]))
+    link_texts.sort()
 
     # Make recursive calls for each link found
     storyData['actions'] = []
@@ -239,8 +243,9 @@ def getCYSStory(browser: webdriver, storyID: int, depth: int, frontier: dict,
         # Search for the link based on its text and click on it.
         try:
             browser.find_element_by_link_text(link_text).click()
+
             # If it worked we can add the 'action' to the frontier.
-            frontier[story_text].append(link_text)
+            frontier[page_contents].append(link_text)
         except:
             continue
 
@@ -257,8 +262,8 @@ def getCYSStory(browser: webdriver, storyID: int, depth: int, frontier: dict,
         updateStatus(action, status_list)
 
     # Remove this story_title from the frontier.
-    if story_text in frontier.keys():
-        frontier.pop(story_text)
+    if page_contents in frontier.keys():
+        frontier.pop(page_contents)
 
     return storyData
 

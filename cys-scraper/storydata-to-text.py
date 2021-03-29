@@ -5,6 +5,7 @@ import json
 import sys
 import argparse
 import os
+import random
 
 
 def main(argv):
@@ -55,9 +56,21 @@ def main(argv):
 
     # Loop through each story in storyData, and
     # add them into one big list.
+    tempList = []
     storyTexts = []
     for story in storyData:
-        storyTexts += storyDataToString(story)
+        tempList += storyDataToString(story)
+
+        # Randomly shrink list if it's too big.
+        if len(tempList) > args.maxStoryVersions:
+            # Shuffle the list
+            random.shuffle(tempList)
+
+            # Shrink the list to the desired 'maxStoryVersions'
+            del tempList[args.maxStoryVersions:]
+
+        storyTexts += tempList
+        tempList = []
 
     # Write the whole thing to file.
     try:

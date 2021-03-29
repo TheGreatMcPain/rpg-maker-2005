@@ -3,34 +3,49 @@
 # for training GPT-2.
 import json
 import sys
+import argparse
 import os
 
 
-def main():
-    def printUsage():
-        print("Usage:", os.path.basename(sys.argv[0]),
-              "<input.json> <output.txt>")
+def main(argv):
+    parser = argparse.ArgumentParser(
+        description=
+        "Convert JSON data from webscraper into a text dataset for GPT-2.")
 
-    if len(sys.argv) == 1:
-        print("Convert story data from json to text for GPT-2 training.\n")
-        printUsage()
-        exit()
+    parser.add_argument('-i',
+                        '--input',
+                        dest='inputJSON',
+                        metavar='<json file>',
+                        type=str,
+                        required=True,
+                        help="Input JSON file")
+    parser.add_argument('-o',
+                        '--output',
+                        dest='outputFile',
+                        metavar='<output file>',
+                        type=str,
+                        required=True,
+                        help="Output TEXT file")
+    parser.add_argument('-n',
+                        '--max-story-versions',
+                        dest='maxStoryVersions',
+                        metavar='<number>',
+                        type=int,
+                        required=False,
+                        default=20,
+                        help="Max number of storys per storyData.")
 
-    argv = sys.argv[1:]
-
-    if len(argv) < 2:
-        printUsage()
-        exit(1)
+    args = parser.parse_args(argv[1:])
 
     # Open json file and load it into storyData
     try:
-        with open(argv[0], 'r') as f:
+        with open(args.inputJSON, 'r') as f:
             storyData = json.load(f)
     except IOError as e:
         print(e)
         exit(e.errno)
     except:
-        print("Oops,", argv[0], "failed to open.")
+        print("Oops,", args.inputJSON, "failed to open.")
         exit(1)
 
     # Check if storyData is a list.
@@ -46,14 +61,14 @@ def main():
 
     # Write the whole thing to file.
     try:
-        with open(argv[1], "w") as outFile:
+        with open(args.outputFile, "w") as outFile:
             for x in storyTexts:
                 outFile.write(x)
     except IOError as e:
         print(e)
         exit(e.errno)
     except:
-        print("Oops,", argv[1], "failed to write.")
+        print("Oops,", args.outputFile, "failed to write.")
         exit(1)
 
     print("Number of texts:", len(storyTexts))
@@ -145,4 +160,4 @@ def makeStoryString(storyData: dict):
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 import json
 import sys
-import getopt
 import os
 import reprint
 import time
+import argparse
 from selenium import webdriver
 
 # Global script start time.
@@ -13,31 +13,7 @@ START_TIME = time.time()
 
 # Copy the file 'config.json.sample' to 'config.json'
 # and edit accordingly
-def main():
-    def printUsage():
-        print("Usage:", sys.argv[0], "-s,--story-id <story id>",
-              "-d,--depth <depth>", "-o,--output <output file>",
-              "-h,--headless\n")
-
-    def printHelp():
-        printUsage()
-        print(
-            "  -s,--story-id <story id>:   'required' The last digits from a",
-            "ChooseYourStory story url.")
-        print(
-            "                                        ",
-            "Scrape through multiple storyids by inputing a comma separated list.\n",
-            "                                       ",
-            "Example: 1234,1447,1002\n")
-        print("  -d,--depth <depth>:         'required'",
-              "How many choices deep we should scrape.")
-        print("                                        ",
-              "(Use a negative number to disable.)\n")
-        print("  -o,--output <output file>:  'required'",
-              "The json file which we'll output to.\n")
-        print("  -h,--headless:                        ",
-              "Don't show the browser window while scraping\n")
-
+def main(argv):
     # Get the absolute path of 'config.json'
     configPath = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                               "config.json")
@@ -54,54 +30,49 @@ def main():
         print("'config.json' was not found!")
         exit(1)
 
-    # Ignore the script name
-    argv = sys.argv[1:]
+    # Setup program arguments.
+    parser = argparse.ArgumentParser(
+        description="WebScraper for ChooseYourStory")
+    parser.add_argument(
+        '-s',
+        '--story-id',
+        dest='storyID',
+        metavar='<storyid, storyids>',
+        type=str,
+        required=True,
+        help=
+        "The ChooseYourStory storyid or a comma separated list of storyids.")
+    parser.add_argument('-d',
+                        '--depth',
+                        dest='depth',
+                        metavar='<depth size>',
+                        type=int,
+                        required=False,
+                        default=-1,
+                        help="How many choices deep we should scrape.")
+    parser.add_argument('-o',
+                        '--output-json',
+                        dest='outputFile',
+                        metavar="<output json>",
+                        type=str,
+                        required=True,
+                        help="Output JSON file.")
+    parser.add_argument('-n',
+                        '--headless',
+                        dest='headless',
+                        action='store_true',
+                        help="Hides the browser window")
+    parser.set_defaults(headless=False)
 
-    # Print the full help message if no arguments are present.
-    if len(argv) == 0:
-        printHelp()
-        exit(1)
+    # Parse arguments
+    args = parser.parse_args(argv)
 
-    storyID = None
+    # Setup variables
+    storyIDs = [int(x) for x in args.storyID.split(",")]
+    depth = args.depth
+    outputFile = args.outputFile
+    headless = args.headless
     storyDataList = []
-    depth = None
-    outputFile = None
-    headless = False
-
-    try:
-        opts, args = getopt.getopt(
-            argv, "s:d:o:h", ["story-id=", "depth=", "output=", "headless"])
-    except:
-        print("Error\n")
-        printUsage()
-        exit(1)
-
-    if len(args) > 0:
-        for arg in args:
-            print(arg, "Is not valid")
-        print()
-        printUsage()
-        exit(1)
-
-    for opt, arg in opts:
-        if opt in ['-s', '--story-id']:
-            storyIDs = [int(x) for x in arg.split(",")]
-        elif opt in ['-d', '--depth']:
-            depth = int(arg)
-        elif opt in ['-o', '--output']:
-            outputFile = arg
-        elif opt in ['-h', '--headless']:
-            headless = True
-
-    if not storyIDs:
-        printUsage()
-        exit(1)
-    if not depth:
-        printUsage()
-        exit(1)
-    if not outputFile:
-        printUsage()
-        exit(1)
 
     browser = spawnBrowser(firefoxBinary, geckodriver, headless)
 
@@ -294,4 +265,4 @@ def getStoryStats(storyData: dict):
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])

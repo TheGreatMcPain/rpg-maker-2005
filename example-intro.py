@@ -40,8 +40,7 @@ def getFigletString(inputStr: str, font: str = "standard"):
 # newline:   End the print with a print()
 def slowPrint(input_str: str, range1: int, range2: int, newline: bool):
     for x in input_str:
-        sys.stdout.write(x)
-        sys.stdout.flush()
+        print(x, end="", flush=True)
         time.sleep(1 / random.randint(range1, range2))
 
     if newline:

@@ -72,7 +72,8 @@ class StoryManager:
 
     # Updates self.storyData['savedActions']
     def saveAction(self, action: dict):
-        # TODO
+        self.storyData['savedActions'].append(action)
+
         self.saveStory()
 
     # Save storyData to json
@@ -92,11 +93,21 @@ class StoryManager:
     # storyData['savedActions'] and storyData['curMemory']
     def getAISeed(self):
         seed = ""
-        # TODO
+
+        for action in storyData['savedActions']:
+            if action not in StoryData['curMemory']:
+                seed.append(action['aiText'] + '\n> ' + action['userText'] + '\n')
+
+        for action in storyData['curMemory']:
+            seed.append(action['aiText'] + '\n> ' + action['userText'] + '\n')
+
         return seed
 
     # Generates a string containing the entire storyData['transcript']
     def getTranscript(self):
         transcript = ""
-        # TODO
+        
+        for action in storyData['transcript']:
+            transcript.append(action['aiText'] + '\n> ' + action['userText'] + '\n')
+
         return transcript

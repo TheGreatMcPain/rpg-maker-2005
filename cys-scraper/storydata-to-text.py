@@ -56,9 +56,12 @@ def main(argv):
 
     # Loop through each story in storyData, and
     # add them into one big list.
+    storyLengths = []
     tempList = []
     storyTexts = []
     for story in storyData:
+        storyLength = {}
+        storyLength['title'] = story['story_title']
         tempList += storyDataToString(story)
 
         # Randomly shrink list if it's too big.
@@ -69,13 +72,24 @@ def main(argv):
             # Shrink the list to the desired 'maxStoryVersions'
             del tempList[args.maxStoryVersions:]
 
+        # Get length of data
+        storyLength['length'] = 0
+        for storyText in tempList:
+            storyLength['length'] += len(storyText)
+
+        storyLengths.append(storyLength)
+
         storyTexts += tempList
         tempList = []
+
+    # Get the total length of the file as we write to it.
+    totalLength = 0
 
     # Write the whole thing to file.
     try:
         with open(args.outputFile, "w") as outFile:
             for x in storyTexts:
+                totalLength += len(x)
                 outFile.write(x)
     except IOError as e:
         print(e)
@@ -84,7 +98,15 @@ def main(argv):
         print("Oops,", args.outputFile, "failed to write.")
         exit(1)
 
-    print("Number of texts:", len(storyTexts))
+    print("Number of texts:", len(storyTexts), end="\n\n")
+
+    # Display the percentage of how much each story takes up in the file.
+    for storyLength in storyLengths:
+        percentage = (storyLength['length'] / totalLength) * 100
+
+        print("Story title:", storyLength['title'])
+        print("percentage in file:", percentage)
+        print()
 
 
 def storyDataToString(storyData: dict,

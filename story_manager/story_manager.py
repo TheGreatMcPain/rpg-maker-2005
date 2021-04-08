@@ -94,20 +94,20 @@ class StoryManager:
     def getAISeed(self):
         seed = ""
 
-        for action in storyData['savedActions']:
-            if action not in StoryData['curMemory']:
-                seed.append(action['aiText'] + '\n> ' + action['userText'] + '\n')
+        for action in self.storyData['savedActions']:
+            if action not in self.storyData['curMemory']:
+                seed += action['aiText'] + '\n> ' + action['userText'] + '\n'
 
-        for action in storyData['curMemory']:
-            seed.append(action['aiText'] + '\n> ' + action['userText'] + '\n')
+        for action in self.storyData['curMemory']:
+            seed += action['aiText'] + '\n> ' + action['userText'] + '\n'
 
         return seed
 
     # Generates a string containing the entire storyData['transcript']
     def getTranscript(self):
         transcript = ""
-        
-        for action in storyData['transcript']:
-            transcript.append(action['aiText'] + '\n> ' + action['userText'] + '\n')
+
+        for action in self.storyData['transcript']:
+            transcript += action['aiText'] + '\n> ' + action['userText'] + '\n'
 
         return transcript

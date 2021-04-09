@@ -6,8 +6,12 @@ import random
 
 screen_width = 100
 
-# Initialize GPT-2 Model #
+# Our modules are located in 'src'
 sys.path.append('src')
+
+import intro, story_manager
+
+# Initialize GPT-2 Model
 from model_manager import ModelManager
 
 GPT2Model = ModelManager("gpt-2/models", "test")
@@ -47,8 +51,10 @@ def title_screen_options():
 def title_screen():
     #Clears the terminal of prior code for a properly formatted title screen.
     os.system('clear')
+    time.sleep(0.5)  # Add a pause to make the intro less jarring.
     #Prints the pretty title.
-    print('RPGMaker2005 presents')
+    # print('RPGMaker2005 presents')
+    intro.showIntro()
     print("")
     print("    Play    ")
     print("    Help    ")
@@ -77,40 +83,42 @@ def setup_game():
     #Clears the terminal for the game to start.
     os.system('clear')
     #Obtains the player's name.
-    question1 = "Hello, what is your name?\n"
-    for character in question1:
-        #This will occur throughout the intro code.  It allows the string to be typed gradually - like a typerwriter effect.
-        sys.stdout.write(character)
-        sys.stdout.flush()
-        time.sleep(0.05)
+    question1 = "Hello, what is your name?"
+    intro.slowPrint(question1, 10, 25, True)
+    # for character in question1:
+    #     #This will occur throughout the intro code.  It allows the string to be typed gradually - like a typerwriter effect.
+    #     sys.stdout.write(character)
+    #     sys.stdout.flush()
+    #     time.sleep(0.05)
     player_name = input("> ")
     player1.name = player_name
 
     #Obtains the player's choice.
-    question2 = "Choose a number.....\n"
-    for character in question2:
-        sys.stdout.write(character)
-        sys.stdout.flush()
-        time.sleep(0.05)
+    question2 = "Choose a number....."
+    intro.slowPrint(question2, 10, 25, True)
+    # for character in question2:
+    #     sys.stdout.write(character)
+    #     sys.stdout.flush()
+    #     time.sleep(0.05)
 
-        #Prints the guide for the player.
-        print("1. Fantagy")
-        print("2. Sic-fi")
-        print("3. Zombi apocalypse")
-        print("4. Or, write a custom pormpt")
-        print("#####################################################")
+    #Prints the guide for the player.
+    print("1. Fantagy")
+    print("2. Sic-fi")
+    print("3. Zombi apocalypse")
+    print("4. Or, write a custom pormpt")
+    print("#####################################################")
+    setting = input("> ")
+    acceptable_setting = ['1', '2', '3', '4']
+
+    while setting.lower() not in acceptable_setting:
+        print("That is not an acceptable number, please try again.")
         setting = input("> ")
-        acceptable_setting = ['1', '2', '3', '4']
+    player1.setting = setting.lower()
 
-        while setting.lower() not in acceptable_setting:
-            print("That is not an acceptable number, please try again.")
-            setting = input("> ")
-        player1.setting = setting.lower()
+    os.system('clear')
+    print("# Here begins the adventure... #")
 
-        os.system('clear')
-        print("# Here begins the adventure... #")
-
-        main_game_loop()
+    main_game_loop()
 
 
 title_screen()

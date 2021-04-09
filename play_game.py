@@ -6,6 +6,12 @@ import random
 
 screen_width = 100
 
+# Initialize GPT-2 Model #
+sys.path.append('src')
+from model_manager import ModelManager
+
+GPT2Model = ModelManager("gpt-2/models", "test")
+
 
 # Player Setup #
 class player:

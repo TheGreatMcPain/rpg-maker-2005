@@ -35,6 +35,14 @@ def main(argv):
                         required=False,
                         default=20,
                         help="Max number of versions of a story.")
+    parser.add_argument('-s',
+                        "--seperate-at-num-actions",
+                        dest='sepAtNumActions',
+                        metavar='<number>',
+                        type=int,
+                        required=False,
+                        default=0,
+                        help="Insert <|endoftext|> at number of actions.")
 
     args = parser.parse_args(argv[1:])
 
@@ -62,7 +70,8 @@ def main(argv):
     for story in storyData:
         storyLength = {}
         storyLength['title'] = story['story_title']
-        tempList += storyDataToString(story)
+        tempList += storyDataToString(
+            story, seperatorAtNumActions=args.sepAtNumActions)
 
         # Randomly shrink list if it's too big.
         if len(tempList) > args.maxStoryVersions:
@@ -111,11 +120,12 @@ def main(argv):
 
 def storyDataToString(storyData: dict,
                       storyTexts: list = [],
-                      first: bool = True):
+                      first: bool = True,
+                      seperatorAtNumActions: int = 0):
     # If there are only 2 keys then we can safely assume
     # that we've reached an ending.
     if len(storyData) == 2:
-        storyTexts.append(makeStoryString(storyData))
+        storyTexts.append(makeStoryString(storyData, seperatorAtNumActions))
         return
 
     for action in storyData['actions']:
@@ -123,13 +133,13 @@ def storyDataToString(storyData: dict,
         # 'storyData' to a new 'parent' attribute.
         action['parent'] = storyData
 
-        storyDataToString(action, storyTexts, False)
+        storyDataToString(action, storyTexts, False, seperatorAtNumActions)
 
     if first:
         return storyTexts
 
 
-def makeStoryString(storyData: dict):
+def makeStoryString(storyData: dict, seperatorAtNumActions: int = 0):
     # list of words that won't make since if we add "you"
     # in front of. (Pulled from AIDungeon github)
     dontAddYou = [
@@ -163,11 +173,14 @@ def makeStoryString(storyData: dict):
     ]
 
     storyText = "<|endoftext|>"
-
+    counter = -1
+    if seperatorAtNumActions > 0:
+        counter = 0
     while 'parent' in storyData.keys():
         storyData = storyData['parent']
 
         actionText = ""
+
         if 'action_text' in storyData.keys():
             firstWord = storyData['action_text'].split(" ")[0]
             if firstWord[-1] == ".":
@@ -189,7 +202,16 @@ def makeStoryString(storyData: dict):
                     actionText = "> You " + storyData['action_text'][0].lower(
                     ) + storyData['action_text'][1:] + "\n"
 
-        storyText = actionText + storyData['story_text'] + "\n" + storyText
+        if (counter >= seperatorAtNumActions) and ('parent'
+                                                   in storyData.keys()):
+            storyText = actionText + "<|endoftext|>" + storyData[
+                'story_text'] + "\n" + storyText
+            counter = 0
+        else:
+            storyText = actionText + storyData['story_text'] + "\n" + storyText
+
+            if (counter != -1):
+                counter += 1
 
     return storyText
 

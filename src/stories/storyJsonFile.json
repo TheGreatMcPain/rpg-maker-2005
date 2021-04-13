@@ -1,1 +1,39 @@
-{"zombies": {"survivor": {"item1": ["pocket knife", "hand gun", "chain saw"], "item2": ["lighter", "roll of duct tape", "first aid kit"], "prompt": ["You stand in your front lawn, watering your garden, when you see a hoard of zombies at the end of the street.", "You are walking in the park when you look behind you and see a hoard of zombies approaching.", "You step out of your house on a beautiful Sunday morning to see a hoard of zombies chasing you."]}, "soldier": {"item1": ["machine gun", "rifle", "hand gun"], "item2": ["gas can", "granade", "radio"], "prompt": ["You step out of the bunker to face the hoard of zombies.", "You are patroling the camp when you see a hoard of zombies approaching quickly.", "You walk the empty streets looking for survivors, when you come across a group of zombies eating a survivor."]}, "hunter": {"item1": ["shotgun", "rifle", "crossbow"], "item2": ["pocket knife", "rope", "lunch box"], "prompt": []}}, "fantasy": {"knight": {"item1": ["dagger", "sword"], "item2": ["potion", "apple"], "prompt": ["You aproach a town that was destroyed by the dragon", "You dismount your horse in a town on the path to defeat the dragon", "You bow before the king who sends you on a quest to slay the dragon"]}}}
+{
+  "zombies": {
+    "survivor": {
+      "item1": ["pocket knife", "hand gun", "chain saw"],
+      "item2": ["lighter", "roll of duct tape", "first aid kit"],
+      "prompt": [
+        "You stand in your front lawn, watering your garden, when you see a hoard of zombies at the end of the street.",
+        "You are walking in the park when you look behind you and see a hoard of zombies approaching.",
+        "You step out of your house on a beautiful Sunday morning to see a hoard of zombies chasing you."
+      ]
+    },
+    "soldier": {
+      "item1": ["machine gun", "rifle", "hand gun"],
+      "item2": ["gas can", "granade", "radio"],
+      "prompt": [
+        "You step out of the bunker to face the hoard of zombies.",
+        "You are patroling the camp when you see a hoard of zombies approaching quickly.",
+        "You walk the empty streets looking for survivors, when you come across a group of zombies eating a survivor."
+      ]
+    },
+    "hunter": {
+      "item1": ["shotgun", "rifle", "crossbow"],
+      "item2": ["pocket knife", "rope", "lunch box"],
+      "prompt": []
+    }
+  },
+  "fantasy": {
+    "knight": {
+      "item1": ["dagger", "sword"],
+      "item2": ["potion", "apple"],
+      "prompt": [
+        "You aproach a town that was destroyed by the dragon",
+        "You dismount your horse in a town on the path to defeat the dragon",
+        "You bow before the king who sends you on a quest to slay the dragon"
+      ]
+    }
+  }
+}
+

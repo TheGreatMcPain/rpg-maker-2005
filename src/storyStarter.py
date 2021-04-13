@@ -11,8 +11,8 @@ import random
 import json
 import os
 
-class StoryStarter:
 
+class StoryStarter:
     def __init__(self, starterJsonStr: str):
         self.prmoptDatabase = {}
         self.starterJson = os.path.abspath(starterJsonStr)
@@ -27,6 +27,7 @@ class StoryStarter:
         getPrompt(genre, character_name, character_class)
         randomly choses from the lists of data in the json file under the set genre and character class.
     '''
+
     def getPrompt(self, genre: str, charName: str, charClass: str):
         genreDatabase = self.promptDatabase[genre]
         classDatabase = genreDatabase[charClass]
@@ -47,8 +48,9 @@ class StoryStarter:
         the set of the second items that could be randomly chosen to be added to the class' items
         the set of prompts that could be randomly chosen to be added to he class' prompts
     '''
+
     def addPrompt(self, genre: str, charClass: str, items1: set, items2: set,
-                    prompts: set):
+                  prompts: set):
         if genre not in self.promptDatabase:
             self.promptDatabase[genre] = {}
         genreDatabase = self.promptDatabase[genre]
@@ -59,18 +61,21 @@ class StoryStarter:
 
         if "item1" not in classDatabase:
             classDatabase["item1"] = []
-        classDatabase["item1"] = list(set(classDatabase["item1"]).union(items1))
+        classDatabase["item1"] = list(
+            set(classDatabase["item1"]).union(items1))
 
         if "item2" not in classDatabase:
             classDatabase["item2"] = []
-        classDatabase["item2"] = list(set(classDatabase["item2"]).union(items2))
+        classDatabase["item2"] = list(
+            set(classDatabase["item2"]).union(items2))
 
         if "prompt" not in classDatabase:
             classDatabase["prompt"] = []
-        classDatabase["prompt"] = list(set(classDatabase["prompt"]).union(prompts))
+        classDatabase["prompt"] = list(
+            set(classDatabase["prompt"]).union(prompts))
 
         with open(self.starterJson, 'w') as jsonFile:
-            json.dump(self.promptDatabase, jsonFile)
+            json.dump(self.promptDatabase, jsonFile, indent=2)
 
         jsonFile.close()
 

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 ''' This class handles premade prompts stored in a json file
     getPrompt takes in a genre, character name, and character class and returns a string that can be fed to the model
         The script will then chose random items and prompts from the sets contained under the genre and character class
@@ -82,3 +83,20 @@ class StoryStarter:
     #Returns a list of the available character classes given the genre
     def listClasses(self, genre: str):
         return list(self.promptDatabase[genre].keys())
+
+
+if __name__ == "__main__":
+    import sys
+    starter = StoryStarter(sys.argv[1])
+
+    print("Current story database:")
+    for genre in starter.listGenres():
+        print("Genre:", genre)
+        print("  Classes:", starter.listClasses(genre))
+        print()
+
+    genre = input("Genre: ")
+    charName = input("Character name: ")
+    charClass = input("Character class: ")
+
+    print(starter.getPrompt(genre, charName, charClass))

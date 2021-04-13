@@ -21,8 +21,6 @@ class StoryStarter:
             with open(self.starterJson, 'r') as jsonFile:
                 self.promptDatabase = json.load(jsonFile)
 
-        jsonFile.close()
-
     ''' Returns a string based off of the premade story prompts that can be fed into the model to start an adventure!
         getPrompt(genre, character_name, character_class)
         randomly choses from the lists of data in the json file under the set genre and character class.
@@ -76,8 +74,6 @@ class StoryStarter:
 
         with open(self.starterJson, 'w') as jsonFile:
             json.dump(self.promptDatabase, jsonFile, indent=2)
-
-        jsonFile.close()
 
     #Returns a list of the available genres
     def listGenres(self):

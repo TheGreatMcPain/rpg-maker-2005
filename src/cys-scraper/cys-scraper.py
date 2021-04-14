@@ -5,6 +5,7 @@ import os
 import reprint
 import time
 import argparse
+import random
 from selenium import webdriver
 
 # Global script start time.
@@ -57,11 +58,26 @@ def main(argv):
                         type=str,
                         required=True,
                         help="Output JSON file.")
+    parser.add_argument('-u',
+                        '--update-json',
+                        dest='updateJson',
+                        action='store_true',
+                        help="Update json file (Don't overwrite old ids)")
     parser.add_argument('-n',
                         '--headless',
                         dest='headless',
                         action='store_true',
                         help="Hides the browser window")
+    parser.add_argument(
+        '-r',
+        '--random',
+        dest='randomNum',
+        metavar="<number of paths>",
+        type=int,
+        required=False,
+        help="Pick random story paths instead of searching for all of them.")
+
+    parser.set_defaults(updateJson=False)
     parser.set_defaults(headless=False)
 
     # Parse arguments
@@ -73,6 +89,18 @@ def main(argv):
     outputFile = args.outputFile
     headless = args.headless
     storyDataList = []
+
+    # Load json file if update is set.
+    if args.updateJson:
+        if os.path.isfile(outputFile):
+            with open(outputFile, 'r') as f:
+                storyDataList = json.load(f)
+
+    # Remove any storyIDs that are already in the json file.
+    if len(storyDataList) > 0:
+        currentIds = [int(x['story_id']) for x in storyDataList]
+        storyIDs = [x for x in storyIDs if x not in currentIds]
+    print(storyIDs)
 
     browser = spawnBrowser(firefoxBinary, geckodriver, headless)
 
@@ -91,7 +119,13 @@ def main(argv):
             status_list.append(
                 "Number of other actions: (Nothing to show yet)")
 
-            storyData = getCYSStory(browser, storyID, depth, {}, status_list)
+            if args.randomNum:
+                storyData = {}
+                for _ in range(args.randomNum):
+                    getCYSStoryRand(browser, storyID, storyData, status_list)
+            else:
+                storyData = getCYSStory(browser, storyID, depth, {},
+                                        status_list)
             storyDataList.append(storyData)
 
         # Clear output (Prevents any terminal output weirdness)
@@ -237,6 +271,106 @@ def getCYSStory(browser: webdriver, storyID: int, depth: int, frontier: dict,
         frontier.pop(page_contents)
 
     return storyData
+
+
+# Instead of attempting to scrape the whole story lets just have the scraper
+# attempt to grab one story from a random path of actions.
+# browser: webdriver from selenium
+# storyID: The ChooseYourStory url number.
+# storyData: An input dictionary.
+# status_list: print list from reprint.
+def getCYSStoryRand(browser: webdriver, storyID: int, storyData: dict,
+                    status_list: list):
+    # Updates the second, third, and fourth lines of the terminal output.
+    def updateStatus(currentAction: dict, status_list: list):
+
+        # Don't even try to access an empty dictionary.
+        if len(currentAction) != 1:
+            status_list[1] = "Elapsed Time (secs): " + str(
+                int(time.time() - START_TIME))
+
+            status_list[2] = "Current Action: " + currentAction['action_text']
+            status_list[3] = "Number of other actions: <N/A>"
+
+    storyLink = "https://chooseyourstory.com/story/viewer/default.aspx?StoryId="
+    storyLink += str(storyID)
+
+    # Don't open the link if we are already on it.
+    if browser.current_url != storyLink:
+        browser.get(storyLink)
+
+        # Since this is the first instance of the function lets
+        # also store the story's title and id for later use.
+        if ('story_id' not in storyData.keys()):
+            storyData['story_title'] = browser.title.split(" :: ")[0]
+            storyData['story_id'] = str(storyID)
+
+    # Check if on a "Rate this story" page.
+    try:
+        header = browser.find_element_by_xpath('/html/body/form/div[3]/h1')
+    except:
+        header = None
+
+    # Stop if we are on a "Rate this story" page.
+    if header:
+        if "Rate" in header.text:
+            return
+
+    # Get the "story" text from the current page
+    story_text = browser.find_element_by_xpath("/html/body/div[3]/div[1]").text
+
+    # Don't create duplicate
+    if 'story_text' not in storyData.keys():
+        storyData['story_text'] = story_text
+
+    # Get All "choices" from current page
+    links = browser.find_elements_by_xpath("/html/body/div[3]/ul/li")
+
+    # Store the link's text in a list
+    # (prevent 'ElementIsStale' errors)
+    link_texts = [link.text for link in links]
+    pick_link = random.choice(link_texts)
+
+    # Attempt to find the link in an exiting actions list
+    existingAction = None
+    if 'actions' in storyData.keys():
+        for action in storyData['actions']:
+            if action['action_text'] == pick_link:
+                existingAction = action
+                break
+
+    # Don't empty the actions list if one exists
+    if 'actions' not in storyData.keys():
+        storyData['actions'] = []
+
+    # Keep picking links until we manage to get one.
+    # If we found an existiing action this shouldn't need to pick again.
+    while True:
+        try:
+            browser.find_element_by_link_text(pick_link).click()
+            break
+        except:
+            pick_link = random.choice(link_texts)
+
+    # If we did find an exising action use it.
+    action = {}
+    if existingAction:
+        action = existingAction
+    else:
+        action['action_text'] = pick_link
+
+    updateStatus(action, status_list)
+
+    # Since we are passing the action as the recursive call's 'storyData'
+    # I would assume that 'action' will get updated.
+    getCYSStoryRand(browser, storyID, action, status_list)
+
+    browser.back()
+
+    if not existingAction:
+        storyData['actions'].append(action)
+
+    return
 
 
 # Returns the number of actions, and branches in the story.

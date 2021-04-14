@@ -43,6 +43,13 @@ def main(argv):
                         required=False,
                         default=0,
                         help="Insert <|endoftext|> at number of actions.")
+    parser.add_argument('-e',
+                        "--exclude-ids",
+                        dest='excludeIds',
+                        metavar='<list-of-ids>',
+                        type=str,
+                        required=False,
+                        help="Comma separated list of ids to exclude.")
 
     args = parser.parse_args(argv[1:])
 
@@ -61,6 +68,11 @@ def main(argv):
     # If not make it a list of one item.
     if not isinstance(storyData, list):
         storyData = [storyData]
+
+    # Remove anything from storyData that's in excludeIds
+    if args.excludeIds:
+        excludeIds = args.excludeIds.split(",")
+        storyData = [x for x in storyData if x['story_id'] not in excludeIds]
 
     # Loop through each story in storyData, and
     # add them into one big list.

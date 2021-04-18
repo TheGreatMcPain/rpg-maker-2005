@@ -1,20 +1,14 @@
-import textwrap
+#!/usr/bin/env python
+# import textwrap
+# import random
+from google_drive_downloader import GoogleDriveDownloader as gdd
 import os
 import sys
 import time
-import random
 
-screen_width = 100
+# screen_width = 100
 
-# Our modules are located in 'src'
-sys.path.append('src')
-
-import intro, story_manager
-
-# Initialize GPT-2 Model
-from model_manager import ModelManager
-
-GPT2Model = ModelManager("gpt-2/models", "test")
+from src import intro, story_manager
 
 
 # Player Setup #
@@ -24,6 +18,37 @@ class player:
 
 
 player1 = player()
+
+# Model downloader
+
+
+def download_model(destination_folder: str):
+    filename = "rpg_model.zip"
+    destination_path = os.path.join(destination_folder, filename)
+
+    # Check if destination_folder exists, and if it has files.
+    if os.path.isdir(destination_folder):
+        if len(os.listdir(destination_folder)) != 0:
+            exists_message = "Model folder {}".format(destination_folder)
+            exists_message += " already has stuff (skipping download)"
+            print(exists_message)
+            return
+
+    # Download the model from GDrive
+    download_message = "Downloading and extracting GPT-2 model. "
+    download_message += "It's 1GB so it'll take a while.\n"
+    print(download_message)
+    gdd.download_file_from_google_drive(
+        file_id="12bakAV7atjWwdKEPwFAZBfHnsIuLMqM2",
+        dest_path=destination_path,
+        showsize=True,
+        unzip=True)
+
+    # Remove the file when finished extracting.
+    print("\nFinished extracting we'll now delete: {}\n".format(
+        destination_path))
+    os.remove(destination_path)
+
 
 # Title Screen #
 
@@ -121,4 +146,8 @@ def setup_game():
     main_game_loop()
 
 
-title_screen()
+if __name__ == "__main__":
+    # We must first download the model
+    download_model("gpt2-model/rpg_model")
+
+    # title_screen()

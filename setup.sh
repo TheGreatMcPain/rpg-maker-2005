@@ -27,11 +27,23 @@ activate_env() {
   fi
 }
 
+# Adds '__init__.py' files into gpt_2 and gpt_2/src
+# This allows gpt_2 python modules to act like a python package.
+add_init_gpt2() {
+  touch "$SCRIPT_LOCATION/gpt_2/__init__.py"
+  touch "$SCRIPT_LOCATION/gpt_2/src/__init__.py"
+
+  # Modify files in "gpt_2/src"
+  sed "s|import model|from gpt_2.src import model|" \
+    -i "$SCRIPT_LOCATION/gpt_2/src/sample.py"
+}
+
 # Initial setup
 # This time use already installed packages on the system
 # (If TensorFlow is installed via package-manager)
 setup_no_tensorflow() {
   activate_env --system-site-packages
+  add_init_gpt2
 
   pip install -r requirements.txt
   pip install -r gpt_2/requirements.txt
@@ -40,6 +52,7 @@ setup_no_tensorflow() {
 # Initial setup
 setup() {
   activate_env
+  add_init_gpt2
 
   pip install -r requirements.txt
   pip install -r gpt_2/requirements.txt
@@ -55,6 +68,7 @@ clean() {
 # Install needed things for James' NeoVim setup.
 setup_development_stuff() {
   activate_env
+  add_init_gpt2
 
   pip install jedi yapf pylint neovim
 }

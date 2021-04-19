@@ -8,10 +8,7 @@ import os
 import numpy as np
 import tensorflow.compat.v1 as tf
 
-# The modules from gpt-2 are in 'gpt-2/src'
-sys.path.append("gpt-2/src")
-
-import encoder, model, sample
+from gpt_2.src import encoder, model, sample
 
 
 class ModelManager:
@@ -21,10 +18,6 @@ class ModelManager:
 
         # Number of batches to run (we only need 1 sample)
         batch_size = 1
-
-        # Integer seed for random number generators,
-        # fix seed to reproduce
-        seed = None
 
         # Float value controlling randomness (Lower is less random)
         temperature = 1
@@ -46,6 +39,7 @@ class ModelManager:
         self.hparams = model.default_hparams()
         with open(os.path.join(model_dir, model_name, 'hparams.json')) as f:
             self.hparams.override_from_dict(json.load(f))
+        seed = np.random.randint(0, 100000)
 
         # The default from the hparams file
         # seems good enough.
@@ -55,8 +49,8 @@ class ModelManager:
 
         # Create a placeholder sample for self.sess.run to use.
         self.context = tf.placeholder(tf.int32, [batch_size, None])
-        np.random.seed(seed)
-        tf.set_random_seed(seed)
+        # np.random.seed(seed)
+        # tf.set_random_seed(seed)
 
         self.output = sample.sample_sequence(hparams=self.hparams,
                                              length=length,
@@ -93,8 +87,9 @@ class ModelManager:
 
 
 if __name__ == "__main__":
-    modelsDir = "gpt-2/models"
-    modelsName = "test"
+    modelsDir = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+                             "../gpt2-model")
+    modelsName = "rpg_model"
 
     testManager = ModelManager(modelsDir, modelsName)
 

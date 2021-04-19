@@ -34,7 +34,7 @@ setup_no_tensorflow() {
   activate_env --system-site-packages
 
   pip install -r requirements.txt
-  pip install -r gpt-2/requirements.txt
+  pip install -r gpt_2/requirements.txt
 }
 
 # Initial setup
@@ -42,7 +42,7 @@ setup() {
   activate_env
 
   pip install -r requirements.txt
-  pip install -r gpt-2/requirements.txt
+  pip install -r gpt_2/requirements.txt
   pip install tensorflow==2.4.1
 }
 

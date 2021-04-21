@@ -45,16 +45,16 @@ class StoryManager:
             self.storyData['curMemory'] = []
             self.storyData['savedActions'] = []
 
-    # Add starting action.
-    def initializeStory(self, startText: str, userText: str):
-        action = self.createAction(startText, userText)
-
-        self.updateMemory(action)
-
-        self.saveAction(action)
-
-        # Save storyData to file
+    # Change save location. (Also, removes the old file)
+    def changeStoryFile(self, storyFile: str):
+        # Store the old storyFile location
+        oldStoryFile = self.storyFile
+        # Update the storyFile location
+        self.storyFile = os.path.join(self.storyDirectory, storyFile)
+        # Dump the current save data into the new file.
         self.saveStory()
+        # Delete the old file.
+        os.remove(oldStoryFile)
 
     # Updates self.storyData['curMemory'] and self.storyData['transcript']
     def updateMemory(self, action: dict):
@@ -88,6 +88,15 @@ class StoryManager:
         action['userText'] = userText
 
         return action
+
+    # Revert previous action (returns last aiText)
+    def revertAction(self):
+        lastAction = self.storyData['curMemory'].pop()
+        # Also remove from transcript
+        self.storyData['transcript'].pop()
+
+        # Return the aiText from that action
+        return lastAction['aiText']
 
     # Generates a string for the AI model using the contents of
     # storyData['savedActions'] and storyData['curMemory']

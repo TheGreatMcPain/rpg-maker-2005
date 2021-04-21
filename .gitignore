@@ -1,5 +1,6 @@
 virtualenv
 __pycache__
+gpt2-model
 src/cys-scraper/config.json
 src/cys-scraper/*.json
 src/cys-scraper/*.txt

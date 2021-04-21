@@ -15,7 +15,7 @@ import os
 
 class StoryStarter:
     def __init__(self, starterJsonStr: str):
-        self.prmoptDatabase = {}
+        self.promptDatabase = {}
         self.starterJson = os.path.abspath(starterJsonStr)
 
         if os.path.isfile(self.starterJson):

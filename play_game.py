@@ -5,19 +5,19 @@ from google_drive_downloader import GoogleDriveDownloader as gdd
 import os
 import sys
 import time
+import threading
 
-# screen_width = 100
+from src import intro, story_manager, game, model_manager
 
-from src import intro, story_manager
+# Initial Setup #
 
+MODEL_DIR = "gpt2-model"
+MODEL_NAME = "rpg_model"
 
-# Player Setup #
-class player:
-    def __init__(self):
-        self.name = ""
-
-
-player1 = player()
+DATA_PATH = "game_data"
+TRANSCRIPT_PATH = os.path.join(DATA_PATH, "transcripts")
+SAVESPATH = os.path.join(DATA_PATH, "saves")
+STORY_JSON = os.path.join(DATA_PATH, "storyDatabase.json")
 
 # Model downloader
 
@@ -50,30 +50,74 @@ def download_model(destination_folder: str):
     os.remove(destination_path)
 
 
+# AI text printer #
+
+
+# Prepares a string do that words don't split in the terminal window.
+def prevent_word_split(string: str, terminal_width: int):
+    lines = string.split("\n")
+    outString = ""
+    for line in lines:
+        words = line.split(" ")
+        tempString = ""
+        for word in words:
+            tempString += "{} ".format(word)
+
+            if len(tempString) >= terminal_width:
+                tempString = tempString.rstrip()
+                lastWord = tempString.split(" ")[-1]
+                tempString = tempString[:len(tempString) -
+                                        len(lastWord)] + "\n" + lastWord
+                outString += tempString + " "
+                tempString = ""
+
+        outString += tempString.rstrip() + "\n"
+    return outString
+
+
+# Thinking Indicator #
+
+# We'll use this to stop the thinking_indicator thread.
+thinking_indicator_is_running = False
+
+
+# This will be used in a thread for showing if the AI is thinking.
+def thinking_indicator():
+    global thinking_indicator_is_running
+    thinking = ['|', '/', '-', '\\']
+    string_length = len("\rThe AI is thinking {}".format(thinking[0]))
+    while thinking_indicator_is_running:
+        for think in thinking:
+            print("\rThe AI is thinking {}".format(think), end="")
+            time.sleep(0.25)
+    # Clears the text
+    print("\r{}".format(" " * string_length), end="\r")
+
+
 # Title Screen #
 
 
-def title_screen_options():
+def title_screen_options(Game: game.Game):
     #Allows the player to select the menu options, case-insensitive.
     option = input("> ")
     if option.lower() == ("play"):
-        setup_game()
+        setup_game(Game)
     elif option.lower() == ("quit"):
         sys.exit()
     elif option.lower() == ("help"):
-        help_menu()
+        help_menu(Game)
     while option.lower() not in ['play', 'help', 'quit']:
         print("Invalid command, please try again.")
         option = input("> ")
         if option.lower() == ("play"):
-            setup_game()
+            setup_game(Game)
         elif option.lower() == ("quit"):
             sys.exit()
         elif option.lower() == ("help"):
-            help_menu()
+            help_menu(Game)
 
 
-def title_screen():
+def title_screen(Game: game.Game):
     #Clears the terminal of prior code for a properly formatted title screen.
     os.system('clear')
     time.sleep(0.5)  # Add a pause to make the intro less jarring.
@@ -84,70 +128,87 @@ def title_screen():
     print("    Play    ")
     print("    Help    ")
     print("    Quit    ")
-    title_screen_options()
+    title_screen_options(Game)
 
 
 # Help Menu #
 
 
-def help_menu():
-    print("")
-    print("Type a basic form of verb")
-    print("let you interact with this bot.\n")
-    print("Please ensure to type in lowercase for ease.\n")
-    print("    Please select an option to continue.     ")
-    print('#' * 20)
-    print("    Play    ")
-    print("    Help    ")
-    print("    Quit    ")
-    title_screen_options()
+def help_menu(Game: game.Game):
+    print(Game.help())
+    title_screen_options(Game)
 
 
 # Execute Game #
-def setup_game():
+def setup_game(Game: game.Game):
     #Clears the terminal for the game to start.
     os.system('clear')
     #Obtains the player's name.
-    question1 = "Hello, what is your name?"
+    question1 = "What is your character's name?"
     intro.slowPrint(question1, 10, 25, True)
-    # for character in question1:
-    #     #This will occur throughout the intro code.  It allows the string to be typed gradually - like a typerwriter effect.
-    #     sys.stdout.write(character)
-    #     sys.stdout.flush()
-    #     time.sleep(0.05)
     player_name = input("> ")
-    player1.name = player_name
 
     #Obtains the player's choice.
-    question2 = "Choose a number....."
+    question2 = "Choose a genre..."
     intro.slowPrint(question2, 10, 25, True)
-    # for character in question2:
-    #     sys.stdout.write(character)
-    #     sys.stdout.flush()
-    #     time.sleep(0.05)
 
-    #Prints the guide for the player.
-    print("1. Fantagy")
-    print("2. Sic-fi")
-    print("3. Zombi apocalypse")
-    print("4. Or, write a custom pormpt")
-    print("#####################################################")
-    setting = input("> ")
-    acceptable_setting = ['1', '2', '3', '4']
+    # Genre/Class selection menu
+    list_of_options = {}
+    listOfGenres = Game.storyStarter.listGenres()
+    for x in range(len(listOfGenres)):
+        list_of_options[str(x)] = listOfGenres[x]
+        message = "{}: {}".format(x, listOfGenres[x])
+        intro.slowPrint(message, 10, 25, True)
+    genre_setting = input("> ")
 
-    while setting.lower() not in acceptable_setting:
-        print("That is not an acceptable number, please try again.")
-        setting = input("> ")
-    player1.setting = setting.lower()
+    if genre_setting in list_of_options.keys():
+        genre_setting = list_of_options[genre_setting]
 
-    os.system('clear')
+    intro.slowPrint("Choose a class...", 10, 25, True)
+
+    list_of_options = {}
+    listOfClasses = Game.storyStarter.listClasses(genre_setting)
+    for x in range(len(listOfClasses)):
+        list_of_options[str(x)] = listOfClasses[x]
+        message = "{}: {}".format(x, listOfClasses[x])
+        intro.slowPrint(message, 10, 25, True)
+    class_setting = input("> ")
+
+    if class_setting in list_of_options.keys():
+        class_setting = list_of_options[class_setting]
+
+    # os.system('clear')
     print("# Here begins the adventure... #")
 
-    main_game_loop()
+    Game.startGame(genre_setting, player_name, class_setting)
+
+    while Game.keepGoing:
+        message = prevent_word_split(Game.currentText,
+                                     os.get_terminal_size()[0])
+        intro.slowPrint(message, 10, 25, True)
+
+        userInput = input("> ")
+
+        global thinking_indicator_is_running
+        thinking_indicator_is_running = True
+        thinkingThread = threading.Thread(target=thinking_indicator)
+
+        # Start thinking indicator
+        thinkingThread.start()
+
+        Game.gameCommand(userInput)
+
+        # Stop thinking indicator
+        thinking_indicator_is_running = False
+        # Wait for thinking_indicator to stop
+        thinkingThread.join()
 
 
 if __name__ == "__main__":
     # We must first download the model
     download_model("gpt2-model/rpg_model")
 
-    # title_screen()
+    modelManager = model_manager.ModelManager(MODEL_DIR, MODEL_NAME)
+    Game = game.Game(modelManager, TRANSCRIPT_PATH, SAVESPATH, STORY_JSON)
+
+    title_screen(Game)

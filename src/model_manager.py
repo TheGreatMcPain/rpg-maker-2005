@@ -20,7 +20,7 @@ class ModelManager:
         batch_size = 1
 
         # Float value controlling randomness (Lower is less random)
-        temperature = 1
+        temperature = 0.75
 
         # Integer value controlling diversity. Basically the number
         # of words that are considered during sample generation.

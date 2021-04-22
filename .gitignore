@@ -4,3 +4,5 @@ gpt2-model
 src/cys-scraper/config.json
 src/cys-scraper/*.json
 src/cys-scraper/*.txt
+game_data/saves/*.json
+game_data/transcripts/*.txt

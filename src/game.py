@@ -99,11 +99,6 @@ class Game:
         return action_text
 
     def _stripAIText(self, inputText):
-        # If for some reason '<|endoftext|>' is in the front of the text.
-        inputText = inputText.lstrip()
-        if inputText.find("<|endoftext|>") == 0:
-            inputText = inputText[len("<|endoftext|>") + 1:]
-
         # First lets fix any weird punctuation.
         inputText = inputText.replace("’", "'")
         inputText = inputText.replace("`", "'")

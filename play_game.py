@@ -6,6 +6,7 @@ import os
 import sys
 import time
 import threading
+import argparse
 
 from src import intro, story_manager, game, model_manager
 
@@ -18,6 +19,13 @@ DATA_PATH = "game_data"
 TRANSCRIPT_PATH = os.path.join(DATA_PATH, "transcripts")
 SAVESPATH = os.path.join(DATA_PATH, "saves")
 STORY_JSON = os.path.join(DATA_PATH, "storyDatabase.json")
+
+parser = argparse.ArgumentParser("Play NotAnother AIDungeon")
+parser.add_argument("--gpu",
+                    action="store_true",
+                    help="Allow use of CUDA (CPU is default)")
+parser.set_defaults(gpu=False)
+args = parser.parse_args()
 
 # Model downloader
 
@@ -208,7 +216,9 @@ if __name__ == "__main__":
     # We must first download the model
     download_model("gpt2-model/rpg_model")
 
-    modelManager = model_manager.ModelManager(MODEL_DIR, MODEL_NAME)
+    modelManager = model_manager.ModelManager(MODEL_DIR,
+                                              MODEL_NAME,
+                                              allow_gpu=args.gpu)
     Game = game.Game(modelManager, TRANSCRIPT_PATH, SAVESPATH, STORY_JSON)
 
     title_screen(Game)

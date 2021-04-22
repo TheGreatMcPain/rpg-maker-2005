@@ -12,7 +12,10 @@ from gpt_2.src import encoder, model, sample
 
 
 class ModelManager:
-    def __init__(self, model_dir: str, model_name: str):
+    def __init__(self,
+                 model_dir: str,
+                 model_name: str,
+                 allow_gpu: bool = False):
         self.model_name = model_name
         self.model_dir = os.path.expanduser(os.path.expandvars(model_dir))
 
@@ -46,7 +49,14 @@ class ModelManager:
         # length = self.hparams.n_ctx // 2
         length = 60
 
-        self.sess = tf.Session()
+        config = None
+        if allow_gpu:
+            config = tf.ConfigProto()
+            config.gpu_options.allow_growth = True
+        else:
+            config = tf.ConfigProto(device_count={"GPU": 0})
+
+        self.sess = tf.Session(config=config)
 
         # Create a placeholder sample for self.sess.run to use.
         self.context = tf.placeholder(tf.int32, [batch_size, None])

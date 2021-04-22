@@ -4,6 +4,7 @@ from .story_manager import StoryManager
 from .storyStarter import StoryStarter
 import datetime
 import os
+import re
 
 
 class Game:
@@ -85,16 +86,113 @@ class Game:
         self.currentText = initialPrompt
 
     def _prepareAction(self, action_text):
-        first_word = action_text.split(" ")[0]
+        # Stuff for translating first person to second person
+        # Pulled from...
+        # https://github.com/Latitude-Archives/AIDungeon/blob/develop/story/utils.py
 
-        if first_word[0] == '"':
+        # Capitalizing the first word in every sentence.
+        def capitalize_first_letters(text):
+            def capitalize_helper(string):
+                string_list = list(string)
+                string_list[0] = string_list[0].upper()
+                return "".join(string_list)
+
+            first_letters_regex = re.compile(r"((?<=[\.\?!]\s)(\w+)|(^\w+))")
+
+            def cap(match):
+                return capitalize_helper(match.group())
+
+            result = first_letters_regex.sub(cap, text)
+            return result
+
+        # Simply capitalize the first letter in a word.
+        def capitalize(word):
+            return word[0].upper() + word[1:]
+
+        # Generates variations of first_to_second_mappings
+        def mapping_variation_pairs(mapping: tuple):
+            mapping_list = []
+            mapping_list.append(
+                (" " + mapping[0] + " ", " " + mapping[1] + " "))
+            mapping_list.append((" " + capitalize(mapping[0]) + " ",
+                                 " " + capitalize(mapping[1]) + " "))
+
+            # Change you before punctuation
+            if mapping[0] is "you":
+                mapping = ("you", "me")
+            mapping_list.append(
+                (" " + mapping[0] + ",", " " + mapping[1] + ","))
+            mapping_list.append(
+                (" " + mapping[0] + "\?", " " + mapping[1] + "\?"))
+            mapping_list.append(
+                (" " + mapping[0] + "\!", " " + mapping[1] + "\!"))
+            mapping_list.append(
+                (" " + mapping[0] + "\.", " " + mapping[1] + "."))
+
+            return mapping_list
+
+        # Replace text, but only outside of quotations
+        def replace_outside_quotes(text, current_word, repl_word):
+            reg_expr = re.compile(current_word + '(?=([^"]*"[^"]*")*[^"]*$)')
+
+            output = reg_expr.sub(repl_word, text)
+            return output
+
+        first_to_second_mappings = [
+            ("I'm", "you're"),
+            ("Im", "you're"),
+            ("Ive", "you've"),
+            ("I am", "you are"),
+            ("was I", "were you"),
+            ("am I", "are you"),
+            ("wasn't I", "weren't you"),
+            ("I", "you"),
+            ("I'd", "you'd"),
+            ("i", "you"),
+            ("I've", "you've"),
+            ("was I", "were you"),
+            ("am I", "are you"),
+            ("wasn't I", "weren't you"),
+            ("I", "you"),
+            ("I'd", "you'd"),
+            ("i", "you"),
+            ("I've", "you've"),
+            ("I was", "you were"),
+            ("my", "your"),
+            ("we", "you"),
+            ("we're", "you're"),
+            ("mine", "yours"),
+            ("me", "you"),
+            ("us", "you"),
+            ("our", "your"),
+            ("I'll", "you'll"),
+            ("myself", "yourself"),
+        ]
+
+        # Lets first remove any whitespace
+        action_text = action_text.strip()
+
+        # Check if the input is dialogue
+        if action_text[0] == '"':
             action_text = "You say, " + action_text
         else:
-            action_text = action_text[0].lower() + action_text[1:]
-            action_text = "You " + action_text
+            # If not add 'You' if needed.
+            if "you" not in action_text[:6].lower() and "I" not in action[:6]:
+                action = action[0].lower() + action[1:]
+                action = "You " + action
 
-        if action_text[-1] not in [".", "?", "!"]:
-            action_text = action_text + "."
+            # Make sure we add punctuation
+            if action_text[-1] not in [".", "?", "!"]:
+                action_text = action_text + "."
+
+        # Translate first person text into second person text.
+        for pair in first_to_second_mappings:
+            variations = mapping_variation_pairs(pair)
+            for variation in variations:
+                action_text = replace_outside_quotes(action_text, variation[0],
+                                                     variation[1])
+
+        action_text = capitalize_first_letters(action_text)
 
         return action_text
 

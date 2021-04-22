@@ -20,16 +20,16 @@ class ModelManager:
         batch_size = 1
 
         # Float value controlling randomness (Lower is less random)
-        temperature = 0.75
+        temperature = 0.4
 
         # Integer value controlling diversity. Basically the number
         # of words that are considered during sample generation.
         # (0 means to have no limit, but 40 is a good value)
-        top_k = 0
+        top_k = 40
 
         # The 'interactive_conditional_samples.py' script does not say
         # what this value does.
-        top_p = 1
+        top_p = 0.9
 
         # Required (Tensorflow will complain if this is not here)
         tf.compat.v1.disable_eager_execution()
@@ -43,7 +43,8 @@ class ModelManager:
 
         # The default from the hparams file
         # seems good enough.
-        length = self.hparams.n_ctx // 2
+        # length = self.hparams.n_ctx // 2
+        length = 60
 
         self.sess = tf.Session()
 
@@ -52,13 +53,15 @@ class ModelManager:
         # np.random.seed(seed)
         # tf.set_random_seed(seed)
 
-        self.output = sample.sample_sequence(hparams=self.hparams,
-                                             length=length,
-                                             context=self.context,
-                                             batch_size=batch_size,
-                                             temperature=temperature,
-                                             top_k=top_k,
-                                             top_p=top_p)
+        self.output = sample.sample_sequence(
+            hparams=self.hparams,
+            length=length,
+            context=self.context,
+            batch_size=batch_size,
+            temperature=temperature,
+            top_k=top_k,
+            top_p=top_p,
+        )
 
         # Load pre-trained model
         saver = tf.train.Saver()

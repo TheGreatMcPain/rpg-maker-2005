@@ -82,9 +82,7 @@ class Game:
         # Get the initial prompt from the StoryStarter
         initialPrompt = self.storyStarter.getPrompt(genre, characterName,
                                                     characterClass)
-        # Lets let the AI generate the initial prompt.
-        self.currentText = self._stripAIText(
-            self.modelManager.getSampleFromText(initialPrompt))
+        self.currentText = initialPrompt
 
     def _prepareAction(self, action_text):
         first_word = action_text.split(" ")[0]

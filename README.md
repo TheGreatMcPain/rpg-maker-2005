@@ -1,10 +1,38 @@
-# A Text Based RPG powered by AI
+# NotAnother AIDungeon: An AI powered text-based RPG
 
-## To clone the repository
+## Setup
+
+1. Clone the repository (Also clones GPT2 submodule)
 
 ```
 $ git clone --recursive <repo url>
 ```
+
+2. Setup the pyton environment and install dependencies
+
+```
+$ ./setup.sh setup
+```
+
+If you already have TensorFlow 2 (2.4.1 as of writing). You can use this command instead.
+
+```
+$ ./setup.sh setup_system_tensorflow
+```
+
+3. Activate the python environment
+
+```
+$ . ./start-virtualenv.sh
+```
+
+4. Play (It will download the model from GDrive if it's not found.)
+
+```
+$ python ./play_game.py
+```
+
+# Below is Dev Stuff
 
 ## Useful git commands (run these while inside the repository)
 

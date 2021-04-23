@@ -293,7 +293,7 @@ if __name__ == "__main__":
 
     model_manager = model_manager.ModelManager(MODEL_DIR,
                                                MODEL_NAME,
-                                               allow_gpu=args.gpu)
+                                               allowGpu=args.gpu)
     game = game.Game(model_manager, TRANSCRIPT_PATH, SAVESPATH, STORY_JSON)
 
     title_screen(game)

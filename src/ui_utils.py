@@ -37,8 +37,8 @@ def getFigletString(inputStr: str, font: str = "standard"):
 # range1:    The first value passed to random.randint()
 # range2:    The second value passed to random.randint()
 # newline:   End the print with a print()
-def slowPrint(input_str: str, range1: int, range2: int, newline: bool):
-    for x in input_str:
+def slowPrint(inputStr: str, range1: int, range2: int, newline: bool):
+    for x in inputStr:
         print(x, end="", flush=True)
         time.sleep(1 / random.randint(range1, range2))
 

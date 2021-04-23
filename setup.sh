@@ -41,7 +41,7 @@ add_init_gpt2() {
 # Initial setup
 # This time use already installed packages on the system
 # (If TensorFlow is installed via package-manager)
-setup_no_tensorflow() {
+setup_system_tensorflow() {
   activate_env --system-site-packages
   add_init_gpt2
 
@@ -78,8 +78,8 @@ if [ "$1"x = "activate_env"x ]; then
   activate_env
 elif [ "$1"x = "setup"x ]; then
   setup
-elif [ "$1"x = "setup_no_tensorflow"x ]; then
-  setup_no_tensorflow
+elif [ "$1"x = "setup_system_tensorflow"x ]; then
+  setup_system_tensorflow
 elif [ "$1"x = "clean"x ]; then
   clean
 elif [ "$1"x = "setup_development_stuff"x ]; then

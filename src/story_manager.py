@@ -38,12 +38,28 @@ class StoryManager:
 
         # If file exists load it into self.storyData
         if os.path.isfile(self.storyFile):
-            self.storyData = json.loads(self.storyFile)
+            with open(self.storyFile, "r") as f:
+                self.storyData = json.load(f)
         else:
             # if it doesn't exist initialize dictionary
+            self.storyData['genre'] = ""
+            self.storyData['class'] = ""
+            self.storyData['player'] = ""
+            self.storyData['currentPrompt'] = ""
             self.storyData['transcript'] = []
             self.storyData['curMemory'] = []
             self.storyData['savedActions'] = []
+
+    # Load saveData from file.
+    def loadStoryData(self, filePath):
+        if not os.path.isfile(filePath):
+            return False
+
+        with open(filePath, "r") as f:
+            self.storyData = json.load(f)
+        self.storyFile = filePath
+
+        return True
 
     # Change save location. (Also, removes the old file)
     def changeStoryFile(self, storyFile: str):
@@ -55,6 +71,10 @@ class StoryManager:
         self.saveStory()
         # Delete the old file.
         os.remove(oldStoryFile)
+
+    def updateCurrentPrompt(self, newPrompt: str):
+        self.storyData['currentPrompt'] = newPrompt
+        self.saveStory()
 
     # Updates self.storyData['curMemory'] and self.storyData['transcript']
     def updateMemory(self, action: dict):
@@ -94,6 +114,10 @@ class StoryManager:
         lastAction = self.storyData['curMemory'].pop()
         # Also remove from transcript
         self.storyData['transcript'].pop()
+
+        # If lastAction exists in savedActions remove it from there.
+        if lastAction in self.storyData['savedActions']:
+            self.storyData['savedActions'].remove(lastAction)
 
         # Return the aiText from that action
         return lastAction['aiText']

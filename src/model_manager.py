@@ -12,15 +12,12 @@ from gpt_2.src import encoder, model, sample
 
 
 class ModelManager:
-    def __init__(self,
-                 model_dir: str,
-                 model_name: str,
-                 allow_gpu: bool = False):
-        self.model_name = model_name
-        self.model_dir = os.path.expanduser(os.path.expandvars(model_dir))
+    def __init__(self, modelDir: str, modelName: str, allowGpu: bool = False):
+        self.modelName = modelName
+        self.modelDir = os.path.expanduser(os.path.expandvars(modelDir))
 
         # Number of batches to run (we only need 1 sample)
-        batch_size = 1
+        batchSize = 1
 
         # Float value controlling randomness (Lower is less random)
         temperature = 0.4
@@ -28,19 +25,19 @@ class ModelManager:
         # Integer value controlling diversity. Basically the number
         # of words that are considered during sample generation.
         # (0 means to have no limit, but 40 is a good value)
-        top_k = 40
+        topK = 40
 
-        # The 'interactive_conditional_samples.py' script does not say
+        # The 'interactiveConditional_samples.py' script does not say
         # what this value does.
-        top_p = 0.9
+        topP = 0.9
 
         # Required (Tensorflow will complain if this is not here)
         tf.compat.v1.disable_eager_execution()
 
         # Load encoder, and hparams
-        self.enc = encoder.get_encoder(model_name, model_dir)
+        self.enc = encoder.get_encoder(modelName, modelDir)
         self.hparams = model.default_hparams()
-        with open(os.path.join(model_dir, model_name, 'hparams.json')) as f:
+        with open(os.path.join(modelDir, modelName, 'hparams.json')) as f:
             self.hparams.override_from_dict(json.load(f))
         seed = np.random.randint(0, 100000)
 
@@ -50,7 +47,7 @@ class ModelManager:
         length = 60
 
         config = None
-        if allow_gpu:
+        if allowGpu:
             config = tf.ConfigProto()
             config.gpu_options.allow_growth = True
         else:
@@ -59,7 +56,7 @@ class ModelManager:
         self.sess = tf.Session(config=config)
 
         # Create a placeholder sample for self.sess.run to use.
-        self.context = tf.placeholder(tf.int32, [batch_size, None])
+        self.context = tf.placeholder(tf.int32, [batchSize, None])
         # np.random.seed(seed)
         # tf.set_random_seed(seed)
 
@@ -67,15 +64,15 @@ class ModelManager:
             hparams=self.hparams,
             length=length,
             context=self.context,
-            batch_size=batch_size,
+            batch_size=batchSize,
             temperature=temperature,
-            top_k=top_k,
-            top_p=top_p,
+            top_k=topK,
+            top_p=topP,
         )
 
         # Load pre-trained model
         saver = tf.train.Saver()
-        ckpt = tf.train.latest_checkpoint(os.path.join(model_dir, model_name))
+        ckpt = tf.train.latest_checkpoint(os.path.join(modelDir, modelName))
 
         with tf.get_default_graph().as_default():
             saver.restore(self.sess, ckpt)
@@ -85,13 +82,13 @@ class ModelManager:
 
     def getSampleFromText(self, inputStr: str):
         # Convert string to tokens
-        context_tokens = self.enc.encode(inputStr)
+        contextTokens = self.enc.encode(inputStr)
 
         # Generate sample
         out = self.sess.run(self.output,
                             feed_dict={self.context:
-                                       [context_tokens]})[:,
-                                                          len(context_tokens):]
+                                       [contextTokens]})[:,
+                                                         len(contextTokens):]
 
         # Convert output tokens to a string
         text = self.enc.decode(out[0])

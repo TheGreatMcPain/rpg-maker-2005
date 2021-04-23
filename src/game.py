@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from .model_manager import ModelManager
 from .story_manager import StoryManager
-from .storyStarter import StoryStarter
+from .story_starter import StoryStarter
 import datetime
 import os
 import re
@@ -62,7 +62,8 @@ class Game:
         filePath = os.path.join(self.transcriptPath, fileName)
 
         with open(filePath, 'w') as transcriptFile:
-            transcriptFile.write(self.storyManager.getTranscript())
+            transcriptFile.write(self.storyManager.getTranscript() + "\n" +
+                                 self.currentText)
 
     # Reverts to the previous incase the user wants to change it
     # for a better AI response.
@@ -83,62 +84,74 @@ class Game:
         # Get the initial prompt from the StoryStarter
         initialPrompt = self.storyStarter.getPrompt(genre, characterName,
                                                     characterClass)
+
+        # Lets add our game info into the storyData
+        self.storyManager.storyData['genre'] = genre
+        self.storyManager.storyData['class'] = characterClass
+        self.storyManager.storyData['player'] = characterName
+
         self.currentText = initialPrompt
 
-    def _prepareAction(self, action_text):
+    # Simply resume the loaded game. (Also returns transcript)
+    def resumeGame(self):
+        self.currentText = self.storyManager.storyData['currentPrompt']
+        self.firstAction = False
+        return self.storyManager.getTranscript()
+
+    def _prepareAction(self, actionText):
         # Stuff for translating first person to second person
         # Pulled from...
         # https://github.com/Latitude-Archives/AIDungeon/blob/develop/story/utils.py
 
         # Capitalizing the first word in every sentence.
-        def capitalize_first_letters(text):
-            def capitalize_helper(string):
-                string_list = list(string)
-                string_list[0] = string_list[0].upper()
-                return "".join(string_list)
+        def capitalizeFirstLetters(text):
+            def capitalizeHelper(string):
+                stringList = list(string)
+                stringList[0] = stringList[0].upper()
+                return "".join(stringList)
 
-            first_letters_regex = re.compile(r"((?<=[\.\?!]\s)(\w+)|(^\w+))")
+            firstLettersRegex = re.compile(r"((?<=[\.\?!]\s)(\w+)|(^\w+))")
 
             def cap(match):
-                return capitalize_helper(match.group())
+                return capitalizeHelper(match.group())
 
-            result = first_letters_regex.sub(cap, text)
+            result = firstLettersRegex.sub(cap, text)
             return result
 
         # Simply capitalize the first letter in a word.
         def capitalize(word):
             return word[0].upper() + word[1:]
 
-        # Generates variations of first_to_second_mappings
-        def mapping_variation_pairs(mapping: tuple):
-            mapping_list = []
-            mapping_list.append(
+        # Generates variations of firstToSecondMappings
+        def mappingVariationPairs(mapping: tuple):
+            mappingList = []
+            mappingList.append(
                 (" " + mapping[0] + " ", " " + mapping[1] + " "))
-            mapping_list.append((" " + capitalize(mapping[0]) + " ",
-                                 " " + capitalize(mapping[1]) + " "))
+            mappingList.append((" " + capitalize(mapping[0]) + " ",
+                                " " + capitalize(mapping[1]) + " "))
 
             # Change you before punctuation
-            if mapping[0] is "you":
+            if mapping[0] == "you":
                 mapping = ("you", "me")
-            mapping_list.append(
+            mappingList.append(
                 (" " + mapping[0] + ",", " " + mapping[1] + ","))
-            mapping_list.append(
+            mappingList.append(
                 (" " + mapping[0] + "\?", " " + mapping[1] + "\?"))
-            mapping_list.append(
+            mappingList.append(
                 (" " + mapping[0] + "\!", " " + mapping[1] + "\!"))
-            mapping_list.append(
+            mappingList.append(
                 (" " + mapping[0] + "\.", " " + mapping[1] + "."))
 
-            return mapping_list
+            return mappingList
 
         # Replace text, but only outside of quotations
-        def replace_outside_quotes(text, current_word, repl_word):
-            reg_expr = re.compile(current_word + '(?=([^"]*"[^"]*")*[^"]*$)')
+        def replaceOutsideQuotes(text, currentWord, replWord):
+            regExpr = re.compile(currentWord + '(?=([^"]*"[^"]*")*[^"]*$)')
 
-            output = reg_expr.sub(repl_word, text)
+            output = regExpr.sub(replWord, text)
             return output
 
-        first_to_second_mappings = [
+        firstToSecondMappings = [
             ("I'm", "you're"),
             ("Im", "you're"),
             ("Ive", "you've"),
@@ -170,31 +183,34 @@ class Game:
         ]
 
         # Lets first remove any whitespace
-        action_text = action_text.strip()
+        actionText = actionText.strip()
 
         # Check if the input is dialogue
-        if action_text[0] == '"':
-            action_text = "You say, " + action_text
+        if actionText[0] == '"':
+            actionText = "You say, " + actionText
         else:
             # If not add 'You' if needed.
-            if "you" not in action_text[:6].lower() and "I" not in action[:6]:
-                action = action[0].lower() + action[1:]
-                action = "You " + action
+            if "you" not in actionText[:6].lower(
+            ) and "I" not in actionText[:6]:
+                actionText = actionText[0].lower() + actionText[1:]
+                actionText = "You " + actionText
 
             # Make sure we add punctuation
-            if action_text[-1] not in [".", "?", "!"]:
-                action_text = action_text + "."
+            if actionText[-1] not in [".", "?", "!"]:
+                actionText = actionText + "."
 
         # Translate first person text into second person text.
-        for pair in first_to_second_mappings:
-            variations = mapping_variation_pairs(pair)
+        actionText = " " + actionText
+        for pair in firstToSecondMappings:
+            variations = mappingVariationPairs(pair)
             for variation in variations:
-                action_text = replace_outside_quotes(action_text, variation[0],
-                                                     variation[1])
+                actionText = replaceOutsideQuotes(actionText, variation[0],
+                                                  variation[1])
 
-        action_text = capitalize_first_letters(action_text)
+        actionText = actionText.strip()
+        actionText = capitalizeFirstLetters(actionText)
 
-        return action_text
+        return actionText
 
     def _stripAIText(self, inputText):
         # First lets fix any weird punctuation.
@@ -204,8 +220,8 @@ class Game:
         inputText = inputText.replace("”", '"')
 
         # Find the last sentence
-        lastIndex = max(inputText.rfind("."), inputText.rfind("!"),
-                        inputText.rfind("?"))
+        lastIndex = max(inputText.rfind("."), inputText.rfind("?"),
+                        inputText.rfind("!"))
 
         # If we can't just use what ever is there
         if lastIndex <= 0:
@@ -223,18 +239,18 @@ class Game:
 
         inputText = inputText[:lastIndex + 1]
 
+        # Remove trailing quotes
+        numQuotes = inputText.count('"')
+        if not numQuotes % 2 == 0:
+            finalInd = inputText.rfind('"')
+            inputText = inputText[:finalInd]
+
         # Remove trailing actions that don't have ">" in front.
         lines = inputText.split("\n")
         lastLine = lines[-1]
         if ("you ask" in lastLine or "You ask" in lastLine or "you say"
                 in lastLine or "You say" in lastLine) and len(lines) > 1:
             inputText = "\n".join(lines[0:-1])
-
-        # Remove trailing quotes
-        numQuotes = inputText.count('"')
-        if numQuotes % 2 != 0:
-            finalInd = inputText.rfind('"')
-            inputText = inputText[:finalInd]
 
         return inputText
 
@@ -306,3 +322,4 @@ class Game:
         # Send the seed to the AI
         aiOutput = self.modelManager.getSampleFromText(aiSeed)
         self.currentText = self._stripAIText(aiOutput)
+        self.storyManager.updateCurrentPrompt(self.currentText)

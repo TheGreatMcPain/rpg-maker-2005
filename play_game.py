@@ -236,6 +236,7 @@ def setup_game(game: game.Game):
         # Genre/Class selection menu
         list_of_options = {}
         list_of_genres = game.storyStarter.listGenres()
+        list_of_genres += ['custom']
         for x in range(len(list_of_genres)):
             option_num = x + 1
             list_of_options[str(option_num)] = list_of_genres[x]
@@ -246,21 +247,34 @@ def setup_game(game: game.Game):
         if genre_setting in list_of_options.keys():
             genre_setting = list_of_options[genre_setting]
 
-        ui_utils.slowPrint("Choose a class...", 10, 25, True)
-
-        list_of_options = {}
-        list_of_classes = game.storyStarter.listClasses(genre_setting)
-        for x in range(len(list_of_classes)):
-            option_num = x + 1
-            list_of_options[str(option_num)] = list_of_classes[x]
-            message = "{}: {}".format(option_num, list_of_classes[x])
+        if genre_setting == "custom":
+            message = "Please write a custom prompt.\n"
+            message += "When writting a prompt it should include as much\n"
+            message += "as possible to help the AI."
             ui_utils.slowPrint(message, 10, 25, True)
-        class_setting = input("> ")
+            custom_prompt = input("> ")
 
-        if class_setting in list_of_options.keys():
-            class_setting = list_of_options[class_setting]
+            class_setting = "custom"
+            game.startGame(genre_setting,
+                           player_name,
+                           class_setting,
+                           customPrompt=custom_prompt)
+        else:
+            ui_utils.slowPrint("Choose a class...", 10, 25, True)
 
-        game.startGame(genre_setting, player_name, class_setting)
+            list_of_options = {}
+            list_of_classes = game.storyStarter.listClasses(genre_setting)
+            for x in range(len(list_of_classes)):
+                option_num = x + 1
+                list_of_options[str(option_num)] = list_of_classes[x]
+                message = "{}: {}".format(option_num, list_of_classes[x])
+                ui_utils.slowPrint(message, 10, 25, True)
+            class_setting = input("> ")
+
+            if class_setting in list_of_options.keys():
+                class_setting = list_of_options[class_setting]
+
+            game.startGame(genre_setting, player_name, class_setting)
 
     while game.keepGoing:
         terminal_width = 80

@@ -80,10 +80,17 @@ class Game:
         self.currentAction = self._stripAIText(aiText)
 
     # All this does is initialize the 'self.currentText'
-    def startGame(self, genre: str, characterName: str, characterClass: str):
+    def startGame(self,
+                  genre: str,
+                  characterName: str,
+                  characterClass: str,
+                  customPrompt: str = None):
         # Get the initial prompt from the StoryStarter
-        initialPrompt = self.storyStarter.getPrompt(genre, characterName,
-                                                    characterClass)
+        if genre == "custom" and customPrompt != None:
+            initialPrompt = customPrompt
+        else:
+            initialPrompt = self.storyStarter.getPrompt(
+                genre, characterName, characterClass)
 
         # Lets add our game info into the storyData
         self.storyManager.storyData['genre'] = genre

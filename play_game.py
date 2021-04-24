@@ -248,11 +248,33 @@ def setup_game(game: game.Game):
             genre_setting = list_of_options[genre_setting]
 
         if genre_setting == "custom":
-            message = "Please write a custom prompt.\n"
-            message += "When writting a prompt it should include as much\n"
-            message += "as possible to help the AI."
+            message = """
+            Please write a custom prompt. (When done writing type '/done')
+            When writting a prompt it should include as much
+            detail as possible to help the AI.
+
+            Here is an example...
+
+            prompt> You are Karl who is a Knight in the kingdom of Ironwood.
+            prompt>
+            prompt> The King of Ironwood has asked you to investigate recent
+            prompt> dragon attacks in the nearby villages.
+            prompt>
+            prompt> You and your fellow knights arrive at a village that
+            prompt> has been reduced to ash by the dragon.
+            """
             ui_utils.slowPrint(message, 10, 25, True)
-            custom_prompt = input("> ")
+
+            # Allow the user to add '\n' to their prompt.
+            custom_prompt = ""
+            while True:
+                cur_input = input("prompt> ")
+                if cur_input.lower() == "/done":
+                    break
+                custom_prompt += cur_input + "\n"
+
+            # Make sure the prompt doesn't have any trailing whitespace.
+            custom_prompt = custom_prompt.strip()
 
             class_setting = "custom"
             game.startGame(genre_setting,

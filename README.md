@@ -14,7 +14,7 @@ $ git clone --recursive <repo url>
 $ ./setup.sh setup
 ```
 
-If you already have TensorFlow 2 (2.4.1 as of writing). You can use this command instead.
+If you already have TensorFlow 2.x.x (2.4.1 as of writing). You can use this command instead.
 
 ```
 $ ./setup.sh setup_system_tensorflow

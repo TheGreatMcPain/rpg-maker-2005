@@ -30,7 +30,7 @@ class StoryManager:
     def __init__(self,
                  storyFile: str,
                  storyDirectory: str,
-                 memorySize: int = 15):
+                 memorySize: int = 5):
         self.storyDirectory = os.path.abspath(storyDirectory)
         self.storyFile = os.path.join(self.storyDirectory, storyFile)
         self.storyData = {}

@@ -37,18 +37,18 @@ class Game:
         return
 
     def help(self):
-        helpText = "After each prompt type a command, for example: \n"
-        helpText += "> go to the town\n\n"
+        helpText = "After each prompt type an action, for example: \n"
+        helpText += "'> go to the town'\n\n"
         helpText += "For dialouge use double quotes (\"), for example: \n"
-        helpText += "> \"hello\" \n\n"
+        helpText += "'> \"hello\"'\n\n"
         helpText += "To type a command, type \"/\" in front of the command\n"
         helpText += "Available Commands:\n"
-        helpText += "help - Displays a list of commands\n"
-        helpText += "quit - quits the adventure\n"
-        helpText += "transcript - saves the adventure to a file\n"
-        helpText += "remember - marks the last action as important\n"
-        helpText += "rewind - rewind the previous action\n"
-        helpText += "retry - send the last action back into the bot\n"
+        helpText += "/help - Displays this message\n"
+        helpText += "/quit - quits the adventure\n"
+        helpText += "/transcript <filename> - saves the adventure to a file\n"
+        helpText += "/remember - marks the last action as important\n"
+        helpText += "/rewind - rewind the previous action\n"
+        helpText += "/retry - send the last action back into the bot\n"
 
         return helpText
 

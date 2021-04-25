@@ -25,7 +25,12 @@ parser = argparse.ArgumentParser("Play NotAnother AIDungeon")
 parser.add_argument("--gpu",
                     action="store_true",
                     help="Allow use of CUDA (CPU is default)")
+parser.add_argument("--disable_slow_print",
+                    dest="enable_slow_print",
+                    action="store_false",
+                    help="Disable (print as if someone was typing)")
 parser.set_defaults(gpu=False)
+parser.set_defaults(enable_slow_print=True)
 args = parser.parse_args()
 
 # Utilities #
@@ -82,6 +87,22 @@ def clear_screen(numlines: int = 100):
     else:
         # Fallback for other platforms
         print("\n" * numlines)
+
+
+# Although I think the 'slowPrint' function from ui_utils
+# is visually appealing I think their should be an option to
+# turn it off.
+# This function will just make implementing this option more
+# easier.
+def slow_print(enable: bool, input_string: str, range1: int, range2: int,
+               newline: bool):
+    if enable:
+        ui_utils.slowPrint(input_string, range1, range2, newline)
+    else:
+        end = ""
+        if newline:
+            end = "\n"
+        print(input_string, end=end)
 
 
 # get info from json
@@ -181,7 +202,8 @@ def help_menu(game: game.Game):
 # Execute Game #
 def setup_game(game: game.Game):
     # Ask if player wants to load from save.
-    ui_utils.slowPrint(
+    slow_print(
+        args.enable_slow_print,
         'Load from Save? (y)es or (n)o (blank will also count as "no")', 10,
         25, True)
     load_save = input("> ").strip().lower()
@@ -197,7 +219,8 @@ def setup_game(game: game.Game):
             print("There are no saves! exiting...")
             sys.exit(1)
         save_options = {}
-        ui_utils.slowPrint("Select a save by number", 10, 25, True)
+        slow_print(args.enable_slow_print, "Select a save by number", 10, 25,
+                   True)
         for i in range(len(saves)):
             save = saves[i]
 
@@ -207,7 +230,7 @@ def setup_game(game: game.Game):
             message += "Class: {} ".format(save['class'])
             message += "Player Name: {}\n".format(save['player'])
 
-            ui_utils.slowPrint(message, 10, 25, True)
+            slow_print(args.enable_slow_print, message, 20, 50, False)
 
             save_options[str(i + 1)] = save['filePath']
 
@@ -227,11 +250,12 @@ def setup_game(game: game.Game):
         print(game.resumeGame())
     else:
         #Obtains the player's name.
-        ui_utils.slowPrint("What is your character's name?", 10, 25, True)
+        slow_print(args.enable_slow_print, "What is your character's name?",
+                   10, 25, True)
         player_name = input("> ")
 
         #Obtains the player's choice.
-        ui_utils.slowPrint("Choose a genre...", 10, 25, True)
+        slow_print(args.enable_slow_print, "Choose a genre...", 10, 25, True)
 
         # Genre/Class selection menu
         list_of_options = {}
@@ -241,29 +265,26 @@ def setup_game(game: game.Game):
             option_num = x + 1
             list_of_options[str(option_num)] = list_of_genres[x]
             message = "{}: {}".format(option_num, list_of_genres[x])
-            ui_utils.slowPrint(message, 10, 25, True)
+            slow_print(args.enable_slow_print, message, 10, 25, True)
         genre_setting = input("> ")
 
         if genre_setting in list_of_options.keys():
             genre_setting = list_of_options[genre_setting]
 
         if genre_setting == "custom":
-            message = """
-            Please write a custom prompt. (When done writing type '/done')
-            When writting a prompt it should include as much
-            detail as possible to help the AI.
-
-            Here is an example...
-
-            prompt> You are Karl who is a Knight in the kingdom of Ironwood.
-            prompt>
-            prompt> The King of Ironwood has asked you to investigate recent
-            prompt> dragon attacks in the nearby villages.
-            prompt>
-            prompt> You and your fellow knights arrive at a village that
-            prompt> has been reduced to ash by the dragon.
-            """
-            ui_utils.slowPrint(message, 10, 25, True)
+            message = "Please write a custom prompt. "
+            message += "(When done writing type '/done')\n"
+            message += "When writting a prompt it should include as much\n"
+            message += "detail as possible to help the AI.\n\n"
+            message += "Here is an example...\n\n"
+            message += "prompt> You are Karl who is a Knight in the kingdom of Ironwood.\n"
+            message += "prompt>\n"
+            message += "prompt> The King of Ironwood has asked you to investigate recent\n"
+            message += "prompt> dragon attacks in the nearby villages.\n"
+            message += "prompt>\n"
+            message += "prompt> You and your fellow knights arrive at a village that\n"
+            message += "prompt> has been reduced to ash by the dragon.\n"
+            slow_print(args.enable_slow_print, message, 25, 50, True)
 
             # Allow the user to add '\n' to their prompt.
             custom_prompt = ""
@@ -282,7 +303,8 @@ def setup_game(game: game.Game):
                            class_setting,
                            customPrompt=custom_prompt)
         else:
-            ui_utils.slowPrint("Choose a class...", 10, 25, True)
+            slow_print(args.enable_slow_print, "Choose a class...", 10, 25,
+                       True)
 
             list_of_options = {}
             list_of_classes = game.storyStarter.listClasses(genre_setting)
@@ -290,7 +312,7 @@ def setup_game(game: game.Game):
                 option_num = x + 1
                 list_of_options[str(option_num)] = list_of_classes[x]
                 message = "{}: {}".format(option_num, list_of_classes[x])
-                ui_utils.slowPrint(message, 10, 25, True)
+                slow_print(args.enable_slow_print, message, 10, 25, True)
             class_setting = input("> ")
 
             if class_setting in list_of_options.keys():
@@ -304,7 +326,7 @@ def setup_game(game: game.Game):
             terminal_width = os.get_terminal_size()[0] - 10
 
         message = prevent_word_split(game.currentText, terminal_width)
-        ui_utils.slowPrint(message, 50, 75, True)
+        slow_print(args.enable_slow_print, message, 50, 75, True)
 
         user_input = input("> ").strip()
 

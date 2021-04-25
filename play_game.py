@@ -306,7 +306,18 @@ def setup_game(game: game.Game):
         message = prevent_word_split(game.currentText, terminal_width)
         ui_utils.slowPrint(message, 50, 75, True)
 
-        user_input = input("> ")
+        user_input = input("> ").strip()
+
+        if user_input[0] == "/":
+            # Replace the printed user text with the one
+            # which will be used by the AI model.
+            new_input = game.prepareAction(user_input)
+            padding = " " * len("> " + user_input)
+
+            # Move cursor up a line and clear the text with 'padding'
+            print("\033[F\r" + padding, end="\r")
+            # print the new text in it's place.
+            print("> " + new_input)
 
         global thinking_indicator_is_running
         thinking_indicator_is_running = True

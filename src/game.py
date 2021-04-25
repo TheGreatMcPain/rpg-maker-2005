@@ -105,7 +105,7 @@ class Game:
         self.firstAction = False
         return self.storyManager.getTranscript()
 
-    def _prepareAction(self, actionText):
+    def prepareAction(self, actionText):
         # Stuff for translating first person to second person
         # Pulled from...
         # https://github.com/Latitude-Archives/AIDungeon/blob/develop/story/utils.py
@@ -313,7 +313,7 @@ class Game:
                 return
 
         # Do main loop
-        userText = self._prepareAction(inputStr)
+        userText = self.prepareAction(inputStr)
         curAction = self.storyManager.createAction(self.currentText, userText)
 
         # Takes the current action and saves it for seed generation

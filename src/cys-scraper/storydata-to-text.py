@@ -36,7 +36,7 @@ def main(argv):
                         default=20,
                         help="Max number of versions of a story.")
     parser.add_argument('-s',
-                        "--seperate-at-num-actions",
+                        "--separate-at-num-actions",
                         dest='sepAtNumActions',
                         metavar='<number>',
                         type=int,

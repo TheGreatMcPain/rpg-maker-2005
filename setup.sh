@@ -45,6 +45,9 @@ setup_system_tensorflow() {
   activate_env --system-site-packages
   add_init_gpt2
 
+  # First upgrade pip (just in case)
+  pip install --upgrade pip
+
   pip install -r requirements.txt
   pip install -r gpt_2/requirements.txt
 }
@@ -53,6 +56,9 @@ setup_system_tensorflow() {
 setup() {
   activate_env
   add_init_gpt2
+
+  # First upgrade pip (just in case)
+  pip install --upgrade pip
 
   pip install -r requirements.txt
   pip install -r gpt_2/requirements.txt

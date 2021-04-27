@@ -8,11 +8,13 @@ import time
 import threading
 import argparse
 import json
+import hashlib
 
 from src import ui_utils, story_manager, game, model_manager
 
 # Initial Setup #
 
+# Global variables
 MODEL_DIR = "gpt2-model"
 MODEL_NAME = "rpg_model"
 
@@ -21,6 +23,7 @@ TRANSCRIPT_PATH = os.path.join(DATA_PATH, "transcripts")
 SAVESPATH = os.path.join(DATA_PATH, "saves")
 STORY_JSON = os.path.join(DATA_PATH, "storyDatabase.json")
 
+# Argument parser
 parser = argparse.ArgumentParser("Play NotAnother AIDungeon")
 parser.add_argument("--gpu",
                     action="store_true",
@@ -29,24 +32,96 @@ parser.add_argument("--disable_slow_print",
                     dest="enable_slow_print",
                     action="store_false",
                     help="Disable (print as if someone was typing)")
+parser.add_argument("--update-model",
+                    dest="update_model",
+                    action="store_true",
+                    help="Updates the GPT2 model if it's not up-to-date.")
 parser.set_defaults(gpu=False)
 parser.set_defaults(enable_slow_print=True)
+parser.set_defaults(update_model=False)
 args = parser.parse_args()
 
 # Utilities #
 
 
-def download_model(destination_folder: str):
+def hashes_match(hashes_data1: dict, hashes_data2: dict):
+    for file in hashes_data1.keys():
+        hash1 = hashes_data1[file]
+        if file not in hashes_data2.keys():
+            return False
+
+        hash2 = hashes_data2[file]
+        if hash1 != hash2:
+            return False
+
+    return True
+
+
+def get_local_model_hashes(model_path: str):
+    os.listdir(model_path)
+    hashes = {}
+    for file in os.listdir(model_path):
+        file_path = os.path.join(model_path, file)
+        blake2b_hash = hashlib.blake2b()
+        with open(file_path, "rb") as f:
+            chunk = f.read(8192)
+            while chunk:
+                blake2b_hash.update(chunk)
+                chunk = f.read(8192)
+        hashes[file] = blake2b_hash.hexdigest()
+    return hashes
+
+
+def get_model_hashes_from_gdrive(destination_folder: str):
+    filename = "rpg-model_black2b.json"
+    destination_path = os.path.join(destination_folder, filename)
+
+    # Download the hashes json file
+    gdd.download_file_from_google_drive(
+        file_id="1-gHJZcBi8WQMtljydjHXiVkqa-0PfjNL",
+        dest_path=destination_path)
+
+    # Load the json file and return the object.
+    hashes = get_json(destination_path)
+
+    # Delete the downloaded file
+    print("Finished loading json data deleting: {}".format(destination_path))
+    os.remove(destination_path)
+
+    return hashes
+
+
+def is_model_outofdate(model_dir: str):
+    remote_hashes = get_model_hashes_from_gdrive("./")
+    local_hashes = get_local_model_hashes(model_dir)
+
+    return hashes_match(local_hashes, remote_hashes)
+
+
+def download_model(destination_folder: str, update: bool = False):
     filename = "rpg_model.zip"
     destination_path = os.path.join(destination_folder, filename)
 
     # Check if destination_folder exists, and if it has files.
     if os.path.isdir(destination_folder):
         if len(os.listdir(destination_folder)) != 0:
-            exists_message = "Model folder {}".format(destination_folder)
-            exists_message += " already has stuff (skipping download)"
-            print(exists_message)
-            return
+            if update:
+                print("Checking for model updates...")
+                if not is_model_outofdate(destination_folder):
+                    print("Model is out-of-date. Updating...")
+
+                    # Delete files in destination_folder
+                    for file in os.listdir(destination_folder):
+                        file_path = os.path.join(destination_folder, file)
+                        os.remove(file_path)
+                else:
+                    print("Model is up-to-date...")
+                    return
+            else:
+                exists_message = "Model folder {}".format(destination_folder)
+                exists_message += " already has stuff (skipping download)"
+                print(exists_message)
+                return
 
     # Download the model from GDrive
     download_message = "Downloading and extracting GPT-2 model. "
@@ -358,7 +433,7 @@ def setup_game(game: game.Game):
 
 if __name__ == "__main__":
     # We must first download the model
-    download_model("gpt2-model/rpg_model")
+    download_model("gpt2-model/rpg_model", args.update_model)
 
     model_manager = model_manager.ModelManager(MODEL_DIR,
                                                MODEL_NAME,

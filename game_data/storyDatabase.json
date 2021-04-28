@@ -11,29 +11,71 @@
     },
     "soldier": {
       "item1": ["machine gun", "rifle", "hand gun"],
-      "item2": ["gas can", "granade", "radio"],
+      "item2": ["gas can", "grenade", "radio"],
       "prompt": [
-        "You step out of the bunker to face the hoard of zombies.",
-        "You are patroling the camp when you see a hoard of zombies approaching quickly.",
+        "You step out of the bunker to face the hoard of zombies just past the barricade.",
+        "You are patrolling the camp when you see a hoard of zombies approaching quickly.",
         "You walk the empty streets looking for survivors, when you come across a group of zombies eating a survivor."
       ]
     },
     "hunter": {
       "item1": ["shotgun", "rifle", "crossbow"],
       "item2": ["pocket knife", "rope", "lunch box"],
-      "prompt": []
+      "prompt": [
+        "You walk out to your pickup truck, ready for your hunting trip, when a hoard of zombies approach.",
+		"You raise your weapon, aiming at a deer, when you see a hoard of zombies come out from behind the trees.",
+		"You step out of your cabin bright an early, ready for a day of hunting, when you see a hoard of zombies approaching."
+      ]
     }
   },
   "fantasy": {
     "knight": {
-      "item1": ["dagger", "sword"],
-      "item2": ["potion", "apple"],
+      "item1": ["dagger", "sword", "battle-axe"],
+      "item2": ["potion", "apple", "shield"],
       "prompt": [
-        "You aproach a town that was destroyed by the dragon",
-        "You dismount your horse in a town on the path to defeat the dragon",
-        "You bow before the king who sends you on a quest to slay the dragon"
+        "You are patrolling he kingdom when you approach a town that was destroyed by the dragon.",
+        "You dismount your horse and enter a tavern. The patrons are all talking among themselves about the recent dragon attack.",
+        "You bow before the king after a dragon had devastated the land. You are now on a quest to slay this dragon."
       ]
-    }
+    },
+	"mage": {
+	  "item1": ["wand", "staff", "dagger"],
+      "item2": ["fire scroll", "book of spells", "ice scroll"],
+      "prompt": [
+        "You step out of your tower to a town devastated by the dragon. The prophesy has foretold this event, and you are prepared.",
+        "You are standing on top of a mountain, observing as a dragon leaves a town after destroying it.",
+        "You walk into the castle, ready to warn the king of the incoming dragon attack, when the roof of the castle gets torn off by the dragon."
+      ]
+	},
+	"thief": {
+	  "item1": ["bow", "dagger", "darts"],
+      "item2": ["bottle of poison", "rope", "bag of gold"],
+      "prompt": [
+        "You rush out of a shop, after successfully robbing the store keeper blind, when you notice the town is on fire, and a dragon is fleeing the scene.",
+        "You emerge from the forest, approaching a town you are planning on robbing, when you notice the town has been destroyed. Survivors are running from the wreckage screaming about a dragon.",
+        "You walk into a tavern, eager to steal from as many drunkards as possible, when you hear some of the patrons talking about a reward for slaying a dragon."
+      ]
+	}
+  },
+  "sci-fi": {
+    "human": {
+	  "item1": ["SMG", "railgun", "rocket launcher"],
+      "item2": ["magnum", "frag grenade", "plasma grenade"],
+      "prompt": [
+        "You sit in the jumpseat of a helicopter as it descends on the battle field. You exit the helicopter, ready to fight the alien army.",
+		"You exit the command center on the spaceship after a briefing from the commander on the war against the aliens, when the alarm goes off. The aliens have started a surprise attack.",
+		"You have crash landed on Earth and need to find your AI companion Cortana who has been taken by the Flood, before the alien army catches up to you."
+      ]
+	},
+	"alien": {
+	  "item1": ["plasma rifle", "needler gun", "plasma cannon"],
+      "item2": ["plasma pistol", "plasma grenade", "energy sword"],
+      "prompt": [
+        "You are sitting in a spacecraft with several other aliens as it descends onto Earth. As soon as the spacecraft touches down on Earth, you and the other aliens exit, ready to fight the humans.",
+		"You sit in the pilot seat of your spacecraft as you and your army of aliens surround a human spaceship. The commander gives the all clear to attack.",
+		"You crash land on Earth after failing to find your alien allies. You see an enemy human helicopter on the horizon."
+      ]
+	},
   }
 }
 

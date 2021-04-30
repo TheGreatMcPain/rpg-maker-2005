@@ -405,7 +405,7 @@ def setup_game(game: game.Game):
 
         user_input = input("> ").strip()
 
-        if user_input[0] == "/":
+        if user_input[0] != "/":
             # Replace the printed user text with the one
             # which will be used by the AI model.
             new_input = game.prepareAction(user_input)

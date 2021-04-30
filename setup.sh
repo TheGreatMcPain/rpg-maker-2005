@@ -34,7 +34,7 @@ add_init_gpt2() {
   touch "$SCRIPT_LOCATION/gpt_2/src/__init__.py"
 
   # Modify files in "gpt_2/src"
-  sed "s|import model|from gpt_2.src import model|" \
+  sed "s|import model|import gpt_2.src.model as model|" \
     -i "$SCRIPT_LOCATION/gpt_2/src/sample.py"
 }
 

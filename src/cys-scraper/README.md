@@ -6,7 +6,7 @@ The `storydata-to-text.py` python script is designed to read the JSON data that 
 
 ## Setup
 
-See: [rpg-maker-2005/README.md](../../README.md)
+See: [rpg-maker-2005/README.md](../../README.md#setup)
 
 ## Usage
 

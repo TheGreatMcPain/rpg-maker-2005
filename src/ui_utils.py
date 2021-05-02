@@ -12,7 +12,7 @@ def main():
 def showIntro():
     terminalWidth = os.get_terminal_size()[0]
     gameNameFont = "larry3d"
-    if terminalWidth <= 84:
+    if terminalWidth < 84:
         gameNameFont = "doom"
 
     maker = "RPGMaker2005"

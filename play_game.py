@@ -279,8 +279,8 @@ def setup_game(game: game.Game):
     # Ask if player wants to load from save.
     slow_print(
         args.enable_slow_print,
-        'Load from Save? (y)es or (n)o (blank will also count as "no")', 10,
-        25, True)
+        'Load from Save? (y)es or (n)o (blank will also count as "no")', 25,
+        50, True)
     load_save = input("> ").strip().lower()
     if len(load_save) > 0:
         while load_save not in ("yes", "no", "y", "n"):
@@ -294,7 +294,7 @@ def setup_game(game: game.Game):
             print("There are no saves! exiting...")
             sys.exit(1)
         save_options = {}
-        slow_print(args.enable_slow_print, "Select a save by number", 10, 25,
+        slow_print(args.enable_slow_print, "Select a save by number", 25, 50,
                    True)
         for i in range(len(saves)):
             save = saves[i]
@@ -305,7 +305,7 @@ def setup_game(game: game.Game):
             message += "Class: {} ".format(save['class'])
             message += "Player Name: {}\n".format(save['player'])
 
-            slow_print(args.enable_slow_print, message, 20, 50, False)
+            slow_print(args.enable_slow_print, message, 25, 50, False)
 
             save_options[str(i + 1)] = save['filePath']
 
@@ -326,11 +326,11 @@ def setup_game(game: game.Game):
     else:
         #Obtains the player's name.
         slow_print(args.enable_slow_print, "What is your character's name?",
-                   10, 25, True)
+                   25, 50, True)
         player_name = input("> ")
 
         #Obtains the player's choice.
-        slow_print(args.enable_slow_print, "Choose a genre...", 10, 25, True)
+        slow_print(args.enable_slow_print, "Choose a genre...", 25, 50, True)
 
         # Genre/Class selection menu
         list_of_options = {}
@@ -340,8 +340,8 @@ def setup_game(game: game.Game):
             option_num = x + 1
             list_of_options[str(option_num)] = list_of_genres[x]
             message = "{}: {}".format(option_num, list_of_genres[x])
-            slow_print(args.enable_slow_print, message, 10, 25, True)
-        genre_setting = input("> ")
+            slow_print(args.enable_slow_print, message, 25, 50, True)
+        genre_setting = input("Pick a number> ")
 
         if genre_setting in list_of_options.keys():
             genre_setting = list_of_options[genre_setting]
@@ -378,7 +378,7 @@ def setup_game(game: game.Game):
                            class_setting,
                            customPrompt=custom_prompt)
         else:
-            slow_print(args.enable_slow_print, "Choose a class...", 10, 25,
+            slow_print(args.enable_slow_print, "Choose a class...", 25, 50,
                        True)
 
             list_of_options = {}
@@ -387,8 +387,8 @@ def setup_game(game: game.Game):
                 option_num = x + 1
                 list_of_options[str(option_num)] = list_of_classes[x]
                 message = "{}: {}".format(option_num, list_of_classes[x])
-                slow_print(args.enable_slow_print, message, 10, 25, True)
-            class_setting = input("> ")
+                slow_print(args.enable_slow_print, message, 25, 50, True)
+            class_setting = input("Pick a number> ")
 
             if class_setting in list_of_options.keys():
                 class_setting = list_of_options[class_setting]

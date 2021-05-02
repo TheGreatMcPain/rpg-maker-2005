@@ -10,6 +10,11 @@ def main():
 
 
 def showIntro():
+    terminalWidth = os.get_terminal_size()[0]
+    gameNameFont = "larry3d"
+    if terminalWidth <= 84:
+        gameNameFont = "doom"
+
     maker = "RPGMaker2005"
     presents = "Proudly Presents"
     dots = "..."
@@ -22,7 +27,7 @@ def showIntro():
     print()
 
     for x in gameName:
-        slowPrint(getFigletString(x, font="larry3d"), 500, 700, False)
+        slowPrint(getFigletString(x, font=gameNameFont), 500, 700, False)
 
 
 def getFigletString(inputStr: str, font: str = "standard"):

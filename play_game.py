@@ -165,7 +165,7 @@ def clear_screen(numlines: int = 100):
 
 
 # Although I think the 'slowPrint' function from ui_utils
-# is visually appealing I think their should be an option to
+# is visually appealing I think there should be an option to
 # turn it off.
 # This function will just make implementing this option more
 # easier.

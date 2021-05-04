@@ -4,9 +4,9 @@
       "item1": ["pocket knife", "hand gun", "chain saw"],
       "item2": ["lighter", "roll of duct tape", "first aid kit"],
       "prompt": [
-        "You stand in your front lawn, watering your garden, when you see a hoard of zombies at the end of the street.",
-        "You are walking in the park when you look behind you and see a hoard of zombies approaching.",
-        "You step out of your house on a beautiful Sunday morning to see a hoard of zombies chasing you."
+        "You stand in your front lawn, watering your garden, when you see a horde of zombies at the end of the street.",
+        "You are walking in the park when you look behind you and see a horde of zombies approaching.",
+        "You step out of your house on a beautiful Sunday morning to see a horde of zombies chasing you."
       ]
     },
     "soldier": {

@@ -27,7 +27,7 @@ class ModelManager:
         # (0 means to have no limit, but 40 is a good value)
         topK = 40
 
-        # The 'interactiveConditional_samples.py' script does not say
+        # The 'interactive_conditional_samples.py' script does not say
         # what this value does.
         topP = 0.9
 

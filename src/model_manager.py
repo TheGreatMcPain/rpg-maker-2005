@@ -39,7 +39,10 @@ class ModelManager:
         self.hparams = model.default_hparams()
         with open(os.path.join(modelDir, modelName, 'hparams.json')) as f:
             self.hparams.override_from_dict(json.load(f))
-        seed = np.random.randint(0, 100000)
+
+        # Normally used when the sample generator hasn't been
+        # given a prompt. We don't really need it.
+        # seed = np.random.randint(0, 100000)
 
         # The default from the hparams file
         # seems good enough.

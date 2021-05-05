@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-# import textwrap
-# import random
+import textwrap
 from google_drive_downloader import GoogleDriveDownloader as gdd
 import os
 import sys
@@ -139,18 +138,21 @@ def download_model(destination_folder: str, update: bool = False):
     os.remove(destination_path)
 
 
-# Restricts line length when printing.
-def prevent_word_split(string: str, terminal_width: int):
-    last_new_line = 0
-    for i in range(len(string)):
-        if string[i] == "\n":
-            last_new_line = 0
-        elif last_new_line > terminal_width and string[i] == " ":
-            string = string[:i] + "\n" + string[i:]
-            last_new_line = 0
-        else:
-            last_new_line += 1
-    return string
+# Use textwrap to prevent text from becoming too long.
+def wrap_text(string: str, terminal_width: int):
+    output_lines = []
+    lines = string.split("\n")
+
+    for line in lines:
+        if len(line) <= terminal_width:
+            output_lines.append(line)
+            continue
+
+        output_lines += textwrap.wrap(line,
+                                      width=terminal_width,
+                                      replace_whitespace=False)
+
+    return "\n".join(output_lines)
 
 
 # Universal way to clear the screen.
@@ -400,7 +402,7 @@ def setup_game(game: game.Game):
         if os.get_terminal_size()[0] < 90:
             terminal_width = os.get_terminal_size()[0] - 10
 
-        message = prevent_word_split(game.currentText, terminal_width)
+        message = wrap_text(game.currentText, terminal_width)
         slow_print(args.enable_slow_print, message, 50, 75, True)
 
         user_input = input("> ").strip()

@@ -62,7 +62,7 @@ setup() {
 
   pip install -r requirements.txt
   pip install -r gpt_2/requirements.txt
-  pip install tensorflow==2.4.1
+  pip install tensorflow==2.11.0
 }
 
 # Delete __pycache__ and virtualenv

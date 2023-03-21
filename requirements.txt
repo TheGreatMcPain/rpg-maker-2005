@@ -1,5 +1,4 @@
 selenium==3.141.0
 reprint==0.6.0
 pyfiglet==0.8.post1
-googledrivedownloader==0.4
 regex==2021.4.4
